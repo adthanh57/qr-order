@@ -771,7 +771,10 @@ document.addEventListener("DOMContentLoaded", function () {
     currentRoom = roomNumber;
     console.log("Phòng hiện tại:", currentRoom); // để debug
   }
-
+  const roomInfoEl = document.getElementById("roomInfo");
+  if (roomInfoEl && currentRoom) {
+    roomInfoEl.textContent = `(Phòng ${currentRoom})`;
+  }
   showScreen(serviceScreen);
   pageTitle.textContent = "Dịch Vụ";
   // Set initial active link
