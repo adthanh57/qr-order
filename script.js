@@ -14,197 +14,10 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
   return res.json();
 }
 document.addEventListener("DOMContentLoaded", function () {
-  // Data
-
-  const services = [
-    {
-      id: 1,
-      name: "Nhà Hàng",
-      description: "Đặt món ăn ngon",
-      hasCategories: true,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%234f46e5'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ENhà Hàng%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 2,
-      name: "Thời Trang",
-      description: "Quần áo, phụ kiện",
-      hasCategories: false,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EThời Trang%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 3,
-      name: "Điện Tử",
-      description: "Thiết bị công nghệ",
-      hasCategories: true,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2310b981'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EĐiện Tử%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 4,
-      name: "Gói Dịch Vụ",
-      description: "Dịch vụ trọn gói",
-      isItem: true,
-      price: 500000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23a855f7'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EGói Dịch Vụ%3C/text%3E%3C/svg%3E",
-    },
-  ];
-
-  const categories = [
-    {
-      id: 1,
-      serviceId: 1,
-      name: "Món Chính",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23ef4444'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EMón Chính%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 2,
-      serviceId: 1,
-      name: "Món Phụ",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EMón Phụ%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 3,
-      serviceId: 1,
-      name: "Đồ Uống",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2310b981'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EĐồ Uống%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 4,
-      serviceId: 3,
-      name: "Điện Thoại",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%236366f1'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EĐiện Thoại%3C/text%3E%3C/svg%3E",
-    },
-    {
-      id: 5,
-      serviceId: 3,
-      name: "Laptop",
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23ec4899'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ELaptop%3C/text%3E%3C/svg%3E",
-    },
-  ];
-
-  const menuItems = [
-    {
-      id: 1,
-      categoryId: 1,
-      name: "Cơm Gà",
-      price: 75000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f87171'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ECơm Gà%3C/text%3E%3C/svg%3E",
-      details:
-        "Gà địa phương, cơm gạo lứt, ships from Vietnam, warranty 1 ngày",
-    },
-    {
-      id: 2,
-      categoryId: 1,
-      name: "Phở Bò",
-      price: 85000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23fb923c'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EPhở Bò%3C/text%3E%3C/svg%3E",
-      details: "Bò Úc, bánh phở tươi, ships from Vietnam, warranty 1 ngày",
-    },
-    {
-      id: 3,
-      categoryId: 2,
-      name: "Salad",
-      price: 45000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2334d399'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ESalad%3C/text%3E%3C/svg%3E",
-      details: "Rau organic, dầu olive, ships from Vietnam, warranty 1 ngày",
-    },
-    {
-      id: 4,
-      categoryId: 3,
-      name: "Trà Sữa",
-      price: 35000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23a78bfa'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ETrà Sữa%3C/text%3E%3C/svg%3E",
-      details: "Trà Đài Loan, sữa tươi, ships from Vietnam, warranty 1 ngày",
-    },
-    {
-      id: 5,
-      categoryId: 3,
-      name: "Cà Phê",
-      price: 30000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23a78bfa'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ECà Phê%3C/text%3E%3C/svg%3E",
-      details: "Cà phê Arabica, rang xay, ships from Vietnam, warranty 1 ngày",
-    },
-    {
-      id: 6,
-      serviceId: 2,
-      name: "Áo Thun",
-      price: 150000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2360a5fa'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EÁo Thun%3C/text%3E%3C/svg%3E",
-      details:
-        "100% cotton, size M, màu trắng, ships from Vietnam, warranty 30 ngày",
-    },
-    {
-      id: 7,
-      serviceId: 2,
-      name: "Quần Jean",
-      price: 350000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2360a5fa'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EQuần Jean%3C/text%3E%3C/svg%3E",
-      details:
-        "Denim cao cấp, size 32, màu xanh đậm, ships from China, warranty 30 ngày",
-    },
-    {
-      id: 8,
-      categoryId: 4,
-      name: "iPhone 13",
-      price: 20000000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23818cf8'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EiPhone 13%3C/text%3E%3C/svg%3E",
-      details: "128GB, màu đen, ships from Singapore, warranty 12 tháng",
-    },
-    {
-      id: 9,
-      categoryId: 4,
-      name: "Samsung Galaxy S21",
-      price: 18000000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23818cf8'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ESamsung S21%3C/text%3E%3C/svg%3E",
-      details: "256GB, màu xanh, ships from Korea, warranty 12 tháng",
-    },
-    {
-      id: 10,
-      categoryId: 5,
-      name: "MacBook Pro",
-      price: 35000000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f472b6'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EMacBook Pro%3C/text%3E%3C/svg%3E",
-      details: "M1 Pro, 16GB RAM, 512GB SSD, ships from USA, warranty 24 tháng",
-    },
-    {
-      id: 11,
-      categoryId: 5,
-      name: "Dell XPS 13",
-      price: 28000000,
-      image:
-        "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f472b6'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EDell XPS 13%3C/text%3E%3C/svg%3E",
-      details:
-        "Intel i7, 16GB RAM, 1TB SSD, ships from China, warranty 12 tháng",
-    },
-  ];
-
   let cart = [];
   let currentService = null;
   let currentCategory = null;
   let discount = 0;
-  let promoCodes = {
-    GIAMGIA10: 0.1,
-    GIAMGIA20: 0.2,
-    FREESHIP: 0.05,
-  };
   let isSidebarCollapsed = false;
 
   // Elements
@@ -320,25 +133,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Service category links in sidebar
-  // sidebarNhaHang.addEventListener("click", function (e) {
-  //   e.preventDefault();
-  //   const service = services.find((s) => s.id === 1);
-  //   navigateToService(service);
-  // });
-
-  // sidebarThoiTrang.addEventListener("click", function (e) {
-  //   e.preventDefault();
-  //   const service = services.find((s) => s.id === 2);
-  //   navigateToService(service);
-  // });
-
-  // sidebarDienTu.addEventListener("click", function (e) {
-  //   e.preventDefault();
-  //   const service = services.find((s) => s.id === 3);
-  //   navigateToService(service);
-  // });
-
   function navigateToService(service) {
     currentService = service;
     pageTitle.textContent = service.name;
@@ -357,16 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
     sidebar.classList.remove("open");
     mobileMenuOverlay.classList.add("hidden");
   }
-
-  // Event Listeners
-  // scanButton.addEventListener("click", function () {
-  //   // Simulate scanning QR code
-  //   setTimeout(function () {
-  //     showScreen(serviceScreen);
-  //     renderServices();
-  //     pageTitle.textContent = "Dịch Vụ";
-  //   }, 1000);
-  // });
 
   backToServices.addEventListener("click", function () {
     showScreen(serviceScreen);
@@ -815,37 +599,3 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Không thể kết nối máy chủ", "error");
     });
 });
-
-(function () {
-  function c() {
-    var b = a.contentDocument || a.contentWindow.document;
-    if (b) {
-      var d = b.createElement("script");
-      d.innerHTML =
-        "window.__CF$cv$params={r:'943b1daf90150994',t:'MTc0NzkwNDM1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
-      b.getElementsByTagName("head")[0].appendChild(d);
-    }
-  }
-  if (document.body) {
-    var a = document.createElement("iframe");
-    a.height = 1;
-    a.width = 1;
-    a.style.position = "absolute";
-    a.style.top = 0;
-    a.style.left = 0;
-    a.style.border = "none";
-    a.style.visibility = "hidden";
-    document.body.appendChild(a);
-    if ("loading" !== document.readyState) c();
-    else if (window.addEventListener)
-      document.addEventListener("DOMContentLoaded", c);
-    else {
-      var e = document.onreadystatechange || function () {};
-      document.onreadystatechange = function (b) {
-        e(b);
-        "loading" !== document.readyState &&
-          ((document.onreadystatechange = e), c());
-      };
-    }
-  }
-})();
