@@ -1037,3 +1037,38 @@ video {
     width: 6rem;
   }
 }
+@media (max-width: 430px) {
+  #servicesPagination button,
+  #categoriesPagination button,
+  #menuItemsPagination button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 2rem;
+  }
+
+  #servicesPagination,
+  #categoriesPagination,
+  #menuItemsPagination {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  #menuItemsScreen .card,
+  #categoryScreen .card,
+  #serviceScreen .card {
+    font-size: 0.85rem;
+  }
+
+  .card h3 {
+    font-size: 1rem;
+  }
+
+  .quantity-input {
+    width: 2.25rem;
+  }
+
+  .add-to-cart {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}

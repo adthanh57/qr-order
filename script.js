@@ -255,57 +255,71 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   function renderServices(serviceList) {
-    servicesList.innerHTML = "";
+    const itemsPerPage = 20;
+    let currentPage = 1;
+    function showPage(page) {
+      servicesList.innerHTML = "";
+      const start = (page - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageItems = serviceList.slice(start, end);
+      pageItems.forEach((service) => {
+        const serviceCard = document.createElement("div");
+        serviceCard.className =
+          "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
 
-    serviceList.forEach((service) => {
-      const serviceCard = document.createElement("div");
-      serviceCard.className =
-        "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
+        const container = document.createElement("div");
+        container.className = "relative w-full h-40";
 
-      const container = document.createElement("div");
-      container.className = "relative w-full h-40";
+        const label = document.createElement("div");
+        label.className =
+          "absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-sm font-semibold";
+        label.textContent = service.Name;
 
-      const label = document.createElement("div");
-      label.className =
-        "absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-sm font-semibold";
-      label.textContent = service.Name;
+        if (service.ImageUrl) {
+          const img = document.createElement("img");
+          img.src = service.ImageUrl;
+          img.alt = service.Name;
+          img.className = "w-full h-40 object-cover";
 
-      if (service.ImageUrl) {
-        const img = document.createElement("img");
-        img.src = service.ImageUrl;
-        img.alt = service.Name;
-        img.className = "w-full h-40 object-cover";
-
-        img.onerror = () => {
-          container.innerHTML = `
+          img.onerror = () => {
+            container.innerHTML = `
           <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
             ${service.Name}
           </div>`;
-          container.appendChild(label);
-        };
+            container.appendChild(label);
+          };
 
-        container.appendChild(img);
-        container.appendChild(label);
-      } else {
-        container.innerHTML = `
+          container.appendChild(img);
+          container.appendChild(label);
+        } else {
+          container.innerHTML = `
         <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
           ${service.Name}
         </div>`;
-        container.appendChild(label);
-      }
+          container.appendChild(label);
+        }
 
-      serviceCard.appendChild(container);
+        serviceCard.appendChild(container);
 
-      serviceCard.addEventListener("click", function () {
-        currentService = service;
-        renderCategories(service.ID, service.Name);
-        categoryTitle.textContent = service.Name + " - Danh Mục";
-        pageTitle.textContent = service.Name + " - Danh Mục";
-        showScreen(categoryScreen);
+        serviceCard.addEventListener("click", function () {
+          currentService = service;
+          renderCategories(service.ID, service.Name);
+          categoryTitle.textContent = service.Name + " - Danh Mục";
+          pageTitle.textContent = service.Name + " - Danh Mục";
+          showScreen(categoryScreen);
+        });
+
+        servicesList.appendChild(serviceCard);
       });
-
-      servicesList.appendChild(serviceCard);
-    });
+      renderPagination(
+        "servicesPagination",
+        serviceList.length,
+        itemsPerPage,
+        page,
+        showPage
+      );
+    }
+    showPage(currentPage);
   }
   async function renderCategories(serviceId, serviceName) {
     try {
@@ -315,61 +329,74 @@ document.addEventListener("DOMContentLoaded", function () {
       );
 
       if (res.error) {
-        categoriesList.innerHTML = "";
-        res.data.forEach((category) => {
-          const categoryCard = document.createElement("div");
-          categoryCard.className =
-            "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
+        const categories = res.data;
+        const itemsPerPage = 6;
+        let currentPage = 1;
 
-          const container = document.createElement("div");
-          container.className = "relative w-full h-40";
+        function showPage(page) {
+          categoriesList.innerHTML = "";
+          const start = (page - 1) * itemsPerPage;
+          const end = start + itemsPerPage;
+          const pageItems = categories.slice(start, end);
 
-          const label = document.createElement("div");
-          label.className =
-            "absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-sm font-semibold";
-          label.textContent = category.Name;
+          pageItems.forEach((category) => {
+            const categoryCard = document.createElement("div");
+            categoryCard.className =
+              "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
 
-          if (category.ImageUrl) {
-            const img = document.createElement("img");
-            img.src = category.ImageUrl;
-            img.alt = category.Name;
-            img.className = "w-full h-40 object-cover";
+            const container = document.createElement("div");
+            container.className = "relative w-full h-40";
 
-            img.onerror = () => {
-              container.innerHTML = `
-              <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
-                ${category.Name}
-              </div>`;
+            const label = document.createElement("div");
+            label.className =
+              "absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-sm font-semibold";
+            label.textContent = category.Name;
+
+            if (category.ImageUrl) {
+              const img = document.createElement("img");
+              img.src = category.ImageUrl;
+              img.alt = category.Name;
+              img.className = "w-full h-40 object-cover";
+
+              img.onerror = () => {
+                container.innerHTML = `<div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">${category.Name}</div>`;
+                container.appendChild(label);
+              };
+
+              container.appendChild(img);
               container.appendChild(label);
-            };
+            } else {
+              container.innerHTML = `<div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">${category.Name}</div>`;
+              container.appendChild(label);
+            }
 
-            container.appendChild(img);
-            container.appendChild(label);
-          } else {
-            container.innerHTML = `
-            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
-              ${category.Name}
-            </div>`;
-            container.appendChild(label);
-          }
+            categoryCard.appendChild(container);
 
-          categoryCard.appendChild(container);
+            categoryCard.addEventListener("click", () => {
+              currentCategory = category;
+              renderMenuItems(
+                serviceId,
+                category.ID,
+                `${serviceName} - ${category.Name}`
+              );
+              menuTitle.textContent = `${serviceName} - ${category.Name}`;
+              pageTitle.textContent = `${serviceName} - ${category.Name}`;
+              showScreen(menuItemsScreen);
+            });
 
-          categoryCard.addEventListener("click", () => {
-            currentCategory = category;
-            renderMenuItems(
-              serviceId,
-              category.ID,
-              `${serviceName} - ${category.Name}`
-            );
-            menuTitle.textContent = currentService.Name + " - " + category.Name;
-            pageTitle.textContent = currentService.Name + " - " + category.Name;
-            showScreen(menuItemsScreen);
+            categoriesList.appendChild(categoryCard);
           });
 
-          categoriesList.appendChild(categoryCard);
-        });
+          renderPagination(
+            "categoriesPagination",
+            categories.length,
+            itemsPerPage,
+            page,
+            showPage
+          );
+        }
 
+        showPage(currentPage);
         categoryTitle.textContent = serviceName + " - Danh Mục";
         showScreen(categoryScreen);
       } else {
@@ -387,74 +414,91 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (res.error) {
-        const list = document.getElementById("menuItemsList");
-        list.innerHTML = "";
+        const menuItems = res.data;
+        const itemsPerPage = 6;
+        let currentPage = 1;
 
-        res.data.forEach((item) => {
-          const itemCard = document.createElement("div");
-          itemCard.className =
-            "card bg-white rounded-lg shadow-md overflow-hidden";
+        function showPage(page) {
+          menuItemsList.innerHTML = "";
+          const start = (page - 1) * itemsPerPage;
+          const end = start + itemsPerPage;
+          const pageItems = menuItems.slice(start, end);
 
-          const imageContainer = document.createElement("div");
-          imageContainer.className =
-            "w-full h-40 bg-gray-200 flex items-center justify-center";
+          pageItems.forEach((item) => {
+            const itemCard = document.createElement("div");
+            itemCard.className =
+              "card bg-white rounded-lg shadow-md overflow-hidden";
 
-          const img = document.createElement("img");
-          img.src = item.ImageUrl || "";
-          img.alt = item.Name;
-          img.className = "w-full h-40 object-cover";
-          img.onerror = () => {
-            imageContainer.innerHTML = ""; // Clear image
-            imageContainer.classList.add("bg-gray-200");
-          };
+            const imageContainer = document.createElement("div");
+            imageContainer.className =
+              "w-full h-40 bg-gray-200 flex items-center justify-center";
 
-          if (item.ImageUrl) imageContainer.appendChild(img);
+            const img = document.createElement("img");
+            img.src = item.ImageUrl || "";
+            img.alt = item.Name;
+            img.className = "w-full h-40 object-cover";
+            img.onerror = () => {
+              imageContainer.innerHTML = "";
+              imageContainer.classList.add("bg-gray-200");
+            };
 
-          const content = document.createElement("div");
-          content.className = "p-4";
-          content.innerHTML = `
-          <h3 class="text-lg font-semibold text-gray-800">${item.Name}</h3>
-          <div class="flex justify-between items-start mt-1">
-            <span class="text-indigo-600 font-medium">${formatPrice(
-              item.Price
-            )}</span>
-          </div>
-          <p class="text-gray-600 mt-1 text-sm">${item.Description || ""}</p>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="flex items-center">
-              <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
-              <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
-              <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
+            if (item.ImageUrl) imageContainer.appendChild(img);
+
+            const content = document.createElement("div");
+            content.className = "p-4";
+            content.innerHTML = `
+            <h3 class="text-lg font-semibold text-gray-800">${item.Name}</h3>
+            <div class="flex justify-between items-start mt-1">
+              <span class="text-indigo-600 font-medium">${formatPrice(
+                item.Price
+              )}</span>
             </div>
-            <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
-          </div>
-        `;
+            <p class="text-gray-600 mt-1 text-sm">${item.Description || ""}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center">
+                <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
+                <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
+                <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
+              </div>
+              <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
+            </div>
+          `;
 
-          itemCard.appendChild(imageContainer);
-          itemCard.appendChild(content);
+            itemCard.appendChild(imageContainer);
+            itemCard.appendChild(content);
 
-          const qtyInput = itemCard.querySelector(".quantity-input");
-          itemCard.querySelector(".decrease-qty").onclick = () => {
-            if (qtyInput.value > 1) qtyInput.value--;
-          };
-          itemCard.querySelector(".increase-qty").onclick = () => {
-            qtyInput.value++;
-          };
-          itemCard.querySelector(".add-to-cart").onclick = () => {
-            addToCart({
-              id: item.ID,
-              name: item.Name,
-              price: item.Price,
-              quantity: parseInt(qtyInput.value),
-              image: item.ImageUrl || "",
-              details: item.Description || "",
-            });
-            showToast(`Đã thêm ${item.Name}`);
-          };
+            const qtyInput = itemCard.querySelector(".quantity-input");
+            itemCard.querySelector(".decrease-qty").onclick = () => {
+              if (qtyInput.value > 1) qtyInput.value--;
+            };
+            itemCard.querySelector(".increase-qty").onclick = () => {
+              qtyInput.value++;
+            };
+            itemCard.querySelector(".add-to-cart").onclick = () => {
+              addToCart({
+                id: item.ID,
+                name: item.Name,
+                price: item.Price,
+                quantity: parseInt(qtyInput.value),
+                image: item.ImageUrl || "",
+                details: item.Description || "",
+              });
+              showToast(`Đã thêm ${item.Name}`);
+            };
 
-          list.appendChild(itemCard);
-        });
+            menuItemsList.appendChild(itemCard);
+          });
 
+          renderPagination(
+            "menuItemsPagination",
+            menuItems.length,
+            itemsPerPage,
+            page,
+            showPage
+          );
+        }
+
+        showPage(currentPage);
         menuTitle.textContent = title;
         showScreen(menuItemsScreen);
       } else {
@@ -463,6 +507,93 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (e) {
       showToast("Lỗi kết nối API khi lấy mặt hàng", "error");
     }
+  }
+
+  function renderPagination(
+    containerId,
+    totalItems,
+    itemsPerPage,
+    currentPage,
+    onPageChange
+  ) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return;
+
+    const maxVisiblePages = 5;
+    const edgePages = 2;
+
+    const createButton = (
+      label,
+      page,
+      isActive = false,
+      isDisabled = false
+    ) => {
+      const btn = document.createElement("button");
+      btn.textContent = label;
+      btn.className = `px-3 py-1 rounded-md ${
+        isActive
+          ? "bg-indigo-600 text-white"
+          : "bg-white text-gray-700 border hover:bg-gray-100"
+      } ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`;
+      if (!isDisabled) {
+        btn.onclick = () => onPageChange(page);
+      }
+      return btn;
+    };
+
+    // Prev button
+    container.appendChild(
+      createButton("<", currentPage - 1, false, currentPage === 1)
+    );
+
+    const pages = [];
+    if (totalPages <= maxVisiblePages + edgePages * 2) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      const startRange = Array.from({ length: edgePages }, (_, i) => i + 1);
+      const endRange = Array.from(
+        { length: edgePages },
+        (_, i) => totalPages - edgePages + 1 + i
+      );
+      const middleStart = Math.max(
+        currentPage - Math.floor(maxVisiblePages / 2),
+        edgePages + 1
+      );
+      const middleEnd = Math.min(
+        currentPage + Math.floor(maxVisiblePages / 2),
+        totalPages - edgePages
+      );
+
+      const middleRange = Array.from(
+        { length: middleEnd - middleStart + 1 },
+        (_, i) => middleStart + i
+      );
+
+      pages.push(...startRange);
+      if (middleStart > edgePages + 1) pages.push("...");
+      pages.push(...middleRange);
+      if (middleEnd < totalPages - edgePages) pages.push("...");
+      pages.push(...endRange);
+    }
+
+    for (const page of pages) {
+      if (page === "...") {
+        const dots = document.createElement("span");
+        dots.textContent = "...";
+        dots.className = "px-2 py-1 text-gray-500";
+        container.appendChild(dots);
+      } else {
+        container.appendChild(createButton(page, page, page === currentPage));
+      }
+    }
+
+    // Next button
+    container.appendChild(
+      createButton(">", currentPage + 1, false, currentPage === totalPages)
+    );
   }
 
   function addToCart(item) {
@@ -631,7 +762,7 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchAPI("GetPOSList", "POST")
     .then((res) => {
       if (res.error) {
-         renderServices(res.data.Categories);
+        renderServices(res.data.Categories);
         showScreen(document.getElementById("serviceScreen"));
         pageTitle.textContent = "Dịch Vụ";
       } else {
