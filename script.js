@@ -763,6 +763,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .then((res) => {
       if (res.error) {
         renderServices(res.data.Categories);
+        renderSidebarServices(res.data.Categories);
         showScreen(document.getElementById("serviceScreen"));
         pageTitle.textContent = "Dịch Vụ";
       } else {
