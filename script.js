@@ -135,15 +135,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function navigateToService(service) {
     currentService = service;
-    pageTitle.textContent = service.name;
+    pageTitle.textContent = service.Name;
 
     if (service.hasCategories) {
       renderCategories(service.id);
-      categoryTitle.textContent = service.name + " - Danh Mục";
+      categoryTitle.textContent = service.Name + " - Danh Mục";
       showScreen(categoryScreen);
     } else {
       renderMenuItems(null, service.id);
-      menuTitle.textContent = service.name;
+      menuTitle.textContent = service.Name;
       showScreen(menuItemsScreen);
     }
 
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
   backButton.addEventListener("click", function () {
     if (currentCategory) {
       showScreen(categoryScreen);
-      pageTitle.textContent = currentService.name + " - Danh Mục";
+      pageTitle.textContent = currentService.Name + " - Danh Mục";
       currentCategory = null;
     } else {
       showScreen(serviceScreen);
