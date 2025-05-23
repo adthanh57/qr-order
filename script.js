@@ -1,3 +1,24 @@
+// Biến toàn cục lưu số phòng
+let currentRoom = null;
+
+// Thêm thông tin kết nối API
+const API_BASE = "https://ezibee.io/api/Intelio";
+const API_AUTH = "Basic " + btoa("intelio:test#api");
+
+// Hàm fetch tiện lợi
+async function fetchAPI(endpoint, method = "GET", body = null) {
+  const options = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: API_AUTH,
+    },
+  };
+  if (body) options.body = JSON.stringify(body);
+
+  const res = await fetch(`${API_BASE}/${endpoint}`, options);
+  return res.json();
+}
 document.addEventListener("DOMContentLoaded", function () {
   // Data
   const services = [
@@ -465,149 +486,119 @@ document.addEventListener("DOMContentLoaded", function () {
     mobileMenuOverlay.classList.add("hidden");
   }
 
-  function renderServices() {
+  function renderServices(serviceList) {
+    const servicesList = document.getElementById("servicesList");
     servicesList.innerHTML = "";
 
-    services.forEach((service) => {
+    serviceList.forEach((service) => {
       const serviceCard = document.createElement("div");
       serviceCard.className =
         "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
       serviceCard.innerHTML = `
-      <img src="${service.image}" alt="${service.name}" class="w-full h-40 object-cover">
+      <div class="p-4">
+        <h3 class="text-lg font-semibold text-gray-800">${service.Name}</h3>
+        <p class="text-gray-600 mt-1">Mã: ${service.Code}</p>
+      </div>
     `;
-
-      // 👉 Xử lý khi bấm vào toàn bộ card
-      serviceCard.addEventListener("click", function () {
-        if (service.isItem) {
-          addToCart({
-            id: service.id,
-            name: service.name,
-            price: service.price,
-            quantity: 1,
-            image: service.image,
-            details:
-              "Gói dịch vụ trọn gói, ships from Vietnam, warranty 30 ngày",
-          });
-          showToast(`Đã thêm ${service.name} vào giỏ hàng!`);
-        } else if (service.hasCategories) {
-          currentService = service;
-          renderCategories(service.id);
-          categoryTitle.textContent = service.name + " - Danh Mục";
-          pageTitle.textContent = service.name + " - Danh Mục";
-          showScreen(categoryScreen);
-        } else {
-          currentService = service;
-          renderMenuItems(null, service.id);
-          menuTitle.textContent = service.name;
-          pageTitle.textContent = service.name;
-          showScreen(menuItemsScreen);
-        }
+      serviceCard.addEventListener("click", () => {
+        currentService = service;
+        renderCategories(service.ID, service.Name);
       });
-
       servicesList.appendChild(serviceCard);
     });
   }
 
-  function renderCategories(serviceId) {
-    categoriesList.innerHTML = "";
-    const serviceCategories = categories.filter(
-      (c) => c.serviceId === serviceId
-    );
-
-    serviceCategories.forEach((category) => {
-      const categoryCard = document.createElement("div");
-      categoryCard.className =
-        "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
-      categoryCard.innerHTML = `
-      <img src="${category.image}" alt="${category.name}" class="w-full h-40 object-cover">
-    `;
-
-      // 👉 Gán sự kiện click lên toàn bộ card
-      categoryCard.addEventListener("click", function () {
-        currentCategory = category;
-        renderMenuItems(category.id);
-        menuTitle.textContent = currentService.name + " - " + category.name;
-        pageTitle.textContent = currentService.name + " - " + category.name;
-        showScreen(menuItemsScreen);
-      });
-
-      categoriesList.appendChild(categoryCard);
-    });
-  }
-
-  function renderMenuItems(categoryId, serviceId = null) {
-    menuItemsList.innerHTML = "";
-    let items;
-
-    if (categoryId) {
-      items = menuItems.filter((item) => item.categoryId === categoryId);
-    } else if (serviceId) {
-      items = menuItems.filter((item) => item.serviceId === serviceId);
-    }
-
-    items.forEach((item) => {
-      const itemCard = document.createElement("div");
-      itemCard.className = "card bg-white rounded-lg shadow-md overflow-hidden";
-      itemCard.innerHTML = `
-                        <img src="${item.image}" alt="${
-        item.name
-      }" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <div class="flex justify-between items-start">
-                                <h3 class="text-lg font-semibold text-gray-800">${
-                                  item.name
-                                }</h3>
-                                <span class="text-indigo-600 font-medium">${formatPrice(
-                                  item.price
-                                )}</span>
-                            </div>
-                            <p class="text-gray-600 mt-1 text-sm">${
-                              item.details
-                            }</p>
-                            <div class="mt-4 flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
-                                    <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
-                                    <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
-                                </div>
-                                <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none">Thêm</button>
-                            </div>
-                        </div>
-                    `;
-
-      const quantityInput = itemCard.querySelector(".quantity-input");
-
-      itemCard
-        .querySelector(".decrease-qty")
-        .addEventListener("click", function () {
-          if (quantityInput.value > 1) {
-            quantityInput.value = parseInt(quantityInput.value) - 1;
-          }
-        });
-
-      itemCard
-        .querySelector(".increase-qty")
-        .addEventListener("click", function () {
-          quantityInput.value = parseInt(quantityInput.value) + 1;
-        });
-
-      itemCard
-        .querySelector(".add-to-cart")
-        .addEventListener("click", function () {
-          const quantity = parseInt(quantityInput.value);
-          addToCart({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: quantity,
-            image: item.image,
-            details: item.details,
+  async function renderCategories(serviceId, serviceName) {
+    try {
+      const res = await fetchAPI(`GetSaleItemCategories?posId=${serviceId}`);
+      if (!res.error) {
+        const categoriesList = document.getElementById("categoriesList");
+        categoriesList.innerHTML = "";
+        res.data.forEach((cat) => {
+          const catCard = document.createElement("div");
+          catCard.className =
+            "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
+          catCard.innerHTML = `
+          <div class="p-4">
+            <h3 class="text-lg font-semibold text-gray-800">${cat.Name}</h3>
+          </div>
+        `;
+          catCard.addEventListener("click", () => {
+            currentCategory = cat;
+            renderMenuItems(serviceId, cat.ID, `${serviceName} - ${cat.Name}`);
           });
-          showToast(`Đã thêm ${quantity} ${item.name} vào giỏ hàng!`);
+          categoriesList.appendChild(catCard);
+        });
+        categoryTitle.textContent = serviceName + " - Danh Mục";
+        showScreen(document.getElementById("categoryScreen"));
+      } else {
+        showToast("Lỗi lấy nhóm mặt hàng", "error");
+      }
+    } catch (e) {
+      showToast("Lỗi kết nối API", "error");
+    }
+  }
+  async function renderMenuItems(serviceId, categoryId, title) {
+    try {
+      const res = await fetchAPI("GetSaleItems", "POST", {
+        ID: serviceId,
+        CategoryID: categoryId,
+      });
+      if (!res.error) {
+        const list = document.getElementById("menuItemsList");
+        list.innerHTML = "";
+        res.data.forEach((item) => {
+          const itemCard = document.createElement("div");
+          itemCard.className =
+            "card bg-white rounded-lg shadow-md overflow-hidden";
+          itemCard.innerHTML = `
+          <div class="p-4">
+            <div class="flex justify-between items-start">
+              <h3 class="text-lg font-semibold text-gray-800">${item.Name}</h3>
+              <span class="text-indigo-600 font-medium">${item.Price.toLocaleString()} ₫</span>
+            </div>
+            <p class="text-gray-600 mt-1 text-sm">${item.Description || ""}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center">
+                <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
+                <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
+                <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
+              </div>
+              <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
+            </div>
+          </div>
+        `;
+
+          const qtyInput = itemCard.querySelector(".quantity-input");
+          itemCard.querySelector(".decrease-qty").onclick = () => {
+            if (qtyInput.value > 1) qtyInput.value--;
+          };
+          itemCard.querySelector(".increase-qty").onclick = () => {
+            qtyInput.value++;
+          };
+          itemCard.querySelector(".add-to-cart").onclick = () => {
+            addToCart({
+              id: item.ID,
+              name: item.Name,
+              price: item.Price,
+              quantity: parseInt(qtyInput.value),
+              image: item.ImageUrl || "",
+              details: item.Description || "",
+            });
+            showToast(`Đã thêm ${item.Name}`);
+          };
+
+          list.appendChild(itemCard);
         });
 
-      menuItemsList.appendChild(itemCard);
-    });
+        menuTitle.textContent = title;
+        showScreen(document.getElementById("menuItemsScreen"));
+      } else {
+        showToast("Không tải được mặt hàng", "error");
+      }
+    } catch (e) {
+      showToast("Lỗi kết nối API", "error");
+    }
   }
 
   function addToCart(item) {
@@ -759,31 +750,42 @@ document.addEventListener("DOMContentLoaded", function () {
       }, 500);
     }, 3000);
   }
-
-  // Initialize
   updateCartCount();
-  renderServices();
-  // 👉 Lấy room từ URL (và bỏ qua service)
 
+  initApp();
+});
+
+// DOMContentLoaded
+function initApp() {
+  // Lấy room từ URL
   const params = new URLSearchParams(window.location.search);
   const roomNumber = params.get("room");
-
   if (roomNumber) {
     currentRoom = roomNumber;
-
-    // Cập nhật UI
     const roomInfoEl = document.getElementById("roomInfo");
     if (roomInfoEl) {
       roomInfoEl.textContent = `(Phòng ${currentRoom})`;
     }
   }
+
+  // 👉 Gọi API lấy danh sách dịch vụ
+  fetchAPI("GetPOSList")
+    .then((res) => {
+      if (!res.error) {
+        const services = res.data.Categories;
+        renderServices(services);
+      } else {
+        showToast("Lỗi lấy danh sách dịch vụ", "error");
+      }
+    })
+    .catch(() => showToast("Lỗi kết nối API", "error"));
+
   showScreen(serviceScreen);
   pageTitle.textContent = "Dịch Vụ";
-  // Set initial active link
   document
     .querySelector('.nav-link[data-screen="serviceScreen"]')
     .classList.add("active");
-});
+}
 
 (function () {
   function c() {
