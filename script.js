@@ -764,16 +764,18 @@ document.addEventListener("DOMContentLoaded", function () {
   updateCartCount();
   renderServices();
   // 👉 Lấy room từ URL (và bỏ qua service)
+
   const params = new URLSearchParams(window.location.search);
   const roomNumber = params.get("room");
 
   if (roomNumber) {
     currentRoom = roomNumber;
-    console.log("Phòng hiện tại:", currentRoom); // để debug
-  }
-  const roomInfoEl = document.getElementById("roomInfo");
-  if (roomInfoEl && currentRoom) {
-    roomInfoEl.textContent = `(Phòng ${currentRoom})`;
+
+    // Cập nhật UI
+    const roomInfoEl = document.getElementById("roomInfo");
+    if (roomInfoEl) {
+      roomInfoEl.textContent = `(Phòng ${currentRoom})`;
+    }
   }
   showScreen(serviceScreen);
   pageTitle.textContent = "Dịch Vụ";
