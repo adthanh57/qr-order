@@ -763,15 +763,13 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize
   updateCartCount();
   renderServices();
-  // 👉 Nếu có ?service=... trong URL thì chuyển hướng
+  // 👉 Lấy room từ URL (và bỏ qua service)
   const params = new URLSearchParams(window.location.search);
-  const serviceId = params.get("service");
-  if (serviceId) {
-    const matchedService = services.find((s) => s.id == serviceId);
-    if (matchedService) {
-      navigateToService(matchedService);
-      return; // Ngăn hiển thị serviceScreen phía dưới
-    }
+  const roomNumber = params.get("room");
+
+  if (roomNumber) {
+    currentRoom = roomNumber;
+    console.log("Phòng hiện tại:", currentRoom); // để debug
   }
 
   showScreen(serviceScreen);
