@@ -216,7 +216,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
   const sidebarItemTexts = document.querySelectorAll(".sidebar-item-text");
   const pageTitle = document.getElementById("pageTitle");
-  const qrScreen = document.getElementById("qrScreen");
   const serviceScreen = document.getElementById("serviceScreen");
   const categoryScreen = document.getElementById("categoryScreen");
   const menuItemsScreen = document.getElementById("menuItemsScreen");
@@ -236,21 +235,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const subtotalEl = document.getElementById("subtotal");
   const discountEl = document.getElementById("discount");
   const totalEl = document.getElementById("total");
-  const promoCodeInput = document.getElementById("promoCode");
-  const applyPromoButton = document.getElementById("applyPromo");
   const continueShopping = document.getElementById("continueShopping");
   const backToShoppingBtn = document.getElementById("backToShoppingBtn");
   const backToShopping = document.getElementById("backToShopping");
   const checkout = document.getElementById("checkout");
-  // const scanButton = document.getElementById("scanButton");
   const newOrder = document.getElementById("newOrder");
   const orderNumber = document.getElementById("orderNumber");
   const emptyCart = document.getElementById("emptyCart");
   const cartContent = document.getElementById("cartContent");
   const navLinks = document.querySelectorAll(".nav-link");
-  // const sidebarNhaHang = document.getElementById("sidebarNhaHang");
-  // const sidebarThoiTrang = document.getElementById("sidebarThoiTrang");
-  // const sidebarDienTu = document.getElementById("sidebarDienTu");
 
   // Sidebar Toggle
   toggleSidebarBtn.addEventListener("click", function () {
@@ -311,9 +304,7 @@ document.addEventListener("DOMContentLoaded", function () {
       this.classList.add("active");
 
       // Update page title
-      if (targetScreen === "qrScreen") {
-        pageTitle.textContent = "Quét Mã QR";
-      } else if (targetScreen === "serviceScreen") {
+       if (targetScreen === "serviceScreen") {
         pageTitle.textContent = "Dịch Vụ";
       } else if (targetScreen === "cartScreen") {
         pageTitle.textContent = "Giỏ Hàng";
@@ -452,7 +443,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Functions
   function showScreen(screen) {
-    qrScreen.classList.add("hidden");
     serviceScreen.classList.add("hidden");
     categoryScreen.classList.add("hidden");
     menuItemsScreen.classList.add("hidden");
@@ -580,7 +570,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (res.error) {
-        const list = document.getElementById("menuItemsList");
+        const list = menuItemsList;
         list.innerHTML = "";
 
         res.data.forEach((item) => {
@@ -639,7 +629,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         menuTitle.textContent = title;
-        showScreen(document.getElementById("menuItemsScreen"));
+        showScreen(menuItemsScreen);
       } else {
         showToast("Không tải được mặt hàng", "error");
       }
