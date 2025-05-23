@@ -216,34 +216,44 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Functions
   function showScreen(screen) {
-    serviceScreen.classList.add("hidden");
-    categoryScreen.classList.add("hidden");
-    menuItemsScreen.classList.add("hidden");
-    cartScreen.classList.add("hidden");
-    confirmationScreen.classList.add("hidden");
+    document
+      .querySelectorAll(
+        "#welcomeScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
+      )
+      .forEach((el) => el.classList.add("hidden"));
+
     screen.classList.remove("hidden");
-
-    // Add fade-in animation
     screen.classList.add("fade-in");
-    setTimeout(() => {
-      screen.classList.remove("fade-in");
-    }, 500);
-
-    // Update active state in sidebar
-    navLinks.forEach((link) => {
-      const targetScreen = link.getAttribute("data-screen");
-      if (targetScreen === screen.id) {
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
-    });
-
-    // Close mobile menu if open
-    sidebar.classList.remove("open");
-    mobileMenuOverlay.classList.add("hidden");
+    setTimeout(() => screen.classList.remove("fade-in"), 500);
   }
 
+  function renderSidebarServices(services) {
+    const container = document.getElementById("sidebarDynamicServices");
+    container.innerHTML = "";
+
+    services.forEach((service) => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+      <a href="#" class="sidebar-item flex items-center px-4 py-3" data-id="${service.ID}">
+        <svg class="h-6 w-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span class="ml-3 sidebar-item-text">${service.Name}</span>
+      </a>
+    `;
+
+      li.querySelector("a").addEventListener("click", (e) => {
+        e.preventDefault();
+        currentService = service;
+        renderCategories(service.ID, service.Name);
+        categoryTitle.textContent = service.Name + " - Danh Mục";
+        pageTitle.textContent = service.Name + " - Danh Mục";
+        showScreen(categoryScreen);
+      });
+
+      container.appendChild(li);
+    });
+  }
   function renderServices(serviceList) {
     servicesList.innerHTML = "";
 
@@ -251,16 +261,44 @@ document.addEventListener("DOMContentLoaded", function () {
       const serviceCard = document.createElement("div");
       serviceCard.className =
         "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
-      serviceCard.innerHTML = ` <img src="${service.ImageUrl}" alt="${service.Name}" class="w-full h-40 object-cover">
-      <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-lg font-semibold">
-        ${service.Name}
-      </div>
-    `;
 
-      // 👉 Xử lý khi bấm vào toàn bộ card
+      const container = document.createElement("div");
+      container.className = "relative w-full h-40";
+
+      const label = document.createElement("div");
+      label.className =
+        "absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-sm font-semibold";
+      label.textContent = service.Name;
+
+      if (service.ImageUrl) {
+        const img = document.createElement("img");
+        img.src = service.ImageUrl;
+        img.alt = service.Name;
+        img.className = "w-full h-40 object-cover";
+
+        img.onerror = () => {
+          container.innerHTML = `
+          <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
+            ${service.Name}
+          </div>`;
+          container.appendChild(label);
+        };
+
+        container.appendChild(img);
+        container.appendChild(label);
+      } else {
+        container.innerHTML = `
+        <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
+          ${service.Name}
+        </div>`;
+        container.appendChild(label);
+      }
+
+      serviceCard.appendChild(container);
+
       serviceCard.addEventListener("click", function () {
         currentService = service;
-        renderCategories(service.ID, service.Name); // 👉 Gọi API danh mục
+        renderCategories(service.ID, service.Name);
         categoryTitle.textContent = service.Name + " - Danh Mục";
         pageTitle.textContent = service.Name + " - Danh Mục";
         showScreen(categoryScreen);
@@ -269,25 +307,53 @@ document.addEventListener("DOMContentLoaded", function () {
       servicesList.appendChild(serviceCard);
     });
   }
-
   async function renderCategories(serviceId, serviceName) {
     try {
       const res = await fetchAPI(
         `GetSaleItemCategories?posId=${serviceId}`,
         "POST"
       );
+
       if (res.error) {
         categoriesList.innerHTML = "";
         res.data.forEach((category) => {
           const categoryCard = document.createElement("div");
           categoryCard.className =
             "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
-          categoryCard.innerHTML = `
-    <img src="${category.ImageUrl}" alt="${category.Name}" class="w-full h-40 object-cover">
-    <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-lg font-semibold">
-      ${category.Name}
-    </div>
-  `;
+
+          const container = document.createElement("div");
+          container.className = "relative w-full h-40";
+
+          const label = document.createElement("div");
+          label.className =
+            "absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-sm font-semibold";
+          label.textContent = category.Name;
+
+          if (category.ImageUrl) {
+            const img = document.createElement("img");
+            img.src = category.ImageUrl;
+            img.alt = category.Name;
+            img.className = "w-full h-40 object-cover";
+
+            img.onerror = () => {
+              container.innerHTML = `
+              <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
+                ${category.Name}
+              </div>`;
+              container.appendChild(label);
+            };
+
+            container.appendChild(img);
+            container.appendChild(label);
+          } else {
+            container.innerHTML = `
+            <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-700 text-sm font-semibold">
+              ${category.Name}
+            </div>`;
+            container.appendChild(label);
+          }
+
+          categoryCard.appendChild(container);
 
           categoryCard.addEventListener("click", () => {
             currentCategory = category;
@@ -317,44 +383,55 @@ document.addEventListener("DOMContentLoaded", function () {
   async function renderMenuItems(serviceId, categoryId, title) {
     try {
       const res = await fetchAPI("GetSaleItems", "POST", {
-        ID: serviceId,
         CategoryID: categoryId,
       });
 
       if (res.error) {
-        const list = menuItemsList;
+        const list = document.getElementById("menuItemsList");
         list.innerHTML = "";
 
         res.data.forEach((item) => {
           const itemCard = document.createElement("div");
           itemCard.className =
             "card bg-white rounded-lg shadow-md overflow-hidden";
-          itemCard.innerHTML = `
-                        <img src="${item.ImageUrl}" alt="${
-            item.Name
-          }" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <div class="flex justify-between items-start">
-                                <h3 class="text-lg font-semibold text-gray-800">${
-                                  item.Name
-                                }</h3>
-                                <span class="text-indigo-600 font-medium">${formatPrice(
-                                  item.Price
-                                )}</span>
-                            </div>
-                            <p class="text-gray-600 mt-1 text-sm">${
-                              item.Description
-                            }</p>
-                            <div class="mt-4 flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
-                                    <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
-                                    <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
-                                </div>
-                                <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none">Thêm</button>
-                            </div>
-                        </div>
-                    `;
+
+          const imageContainer = document.createElement("div");
+          imageContainer.className =
+            "w-full h-40 bg-gray-200 flex items-center justify-center";
+
+          const img = document.createElement("img");
+          img.src = item.ImageUrl || "";
+          img.alt = item.Name;
+          img.className = "w-full h-40 object-cover";
+          img.onerror = () => {
+            imageContainer.innerHTML = ""; // Clear image
+            imageContainer.classList.add("bg-gray-200");
+          };
+
+          if (item.ImageUrl) imageContainer.appendChild(img);
+
+          const content = document.createElement("div");
+          content.className = "p-4";
+          content.innerHTML = `
+          <h3 class="text-lg font-semibold text-gray-800">${item.Name}</h3>
+          <div class="flex justify-between items-start mt-1">
+            <span class="text-indigo-600 font-medium">${formatPrice(
+              item.Price
+            )}</span>
+          </div>
+          <p class="text-gray-600 mt-1 text-sm">${item.Description || ""}</p>
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center">
+              <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
+              <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
+              <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
+            </div>
+            <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
+          </div>
+        `;
+
+          itemCard.appendChild(imageContainer);
+          itemCard.appendChild(content);
 
           const qtyInput = itemCard.querySelector(".quantity-input");
           itemCard.querySelector(".decrease-qty").onclick = () => {
@@ -554,7 +631,7 @@ document.addEventListener("DOMContentLoaded", function () {
   fetchAPI("GetPOSList", "POST")
     .then((res) => {
       if (res.error) {
-        renderServices(res.data.Categories);
+         renderServices(res.data.Categories);
         showScreen(document.getElementById("serviceScreen"));
         pageTitle.textContent = "Dịch Vụ";
       } else {
@@ -565,4 +642,3 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Không thể kết nối máy chủ", "error");
     });
 });
-
