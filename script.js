@@ -1,11 +1,5 @@
-// Biến toàn cục lưu số phòng
-let currentRoom = null;
-
-// Thêm thông tin kết nối API
 const API_BASE = "https://ezibee.io/api/Intelio";
 const API_AUTH = "Basic " + btoa("intelio:test#api");
-
-// Hàm fetch tiện lợi
 async function fetchAPI(endpoint, method = "GET", body = null) {
   const options = {
     method,
@@ -21,6 +15,7 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
 }
 document.addEventListener("DOMContentLoaded", function () {
   // Data
+
   const services = [
     {
       id: 1,
@@ -487,7 +482,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function renderServices(serviceList) {
-    const servicesList = document.getElementById("servicesList");
     servicesList.innerHTML = "";
 
     serviceList.forEach((service) => {
@@ -495,79 +489,107 @@ document.addEventListener("DOMContentLoaded", function () {
       serviceCard.className =
         "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
       serviceCard.innerHTML = `
-      <div class="p-4">
-        <h3 class="text-lg font-semibold text-gray-800">${service.Name}</h3>
-        <p class="text-gray-600 mt-1">Mã: ${service.Code}</p>
-      </div>
+      <img src="${service.ImageUrl}" alt="${service.Name}" class="w-full h-40 object-cover">
     `;
-      serviceCard.addEventListener("click", () => {
+
+      // 👉 Xử lý khi bấm vào toàn bộ card
+      serviceCard.addEventListener("click", function () {
         currentService = service;
-        renderCategories(service.ID, service.Name);
+        renderCategories(service.ID, service.Name); // 👉 Gọi API danh mục
+        categoryTitle.textContent = service.Name + " - Danh Mục";
+        pageTitle.textContent = service.Name + " - Danh Mục";
+        showScreen(categoryScreen);
       });
+
       servicesList.appendChild(serviceCard);
     });
   }
 
   async function renderCategories(serviceId, serviceName) {
     try {
-      const res = await fetchAPI(`GetSaleItemCategories?posId=${serviceId}`);
-      if (!res.error) {
-        const categoriesList = document.getElementById("categoriesList");
+      const res = await fetchAPI(
+        `GetSaleItemCategories?posId=${serviceId}`,
+        "POST"
+      );
+      if (res.error) {
         categoriesList.innerHTML = "";
-        res.data.forEach((cat) => {
-          const catCard = document.createElement("div");
-          catCard.className =
-            "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
-          catCard.innerHTML = `
-          <div class="p-4">
-            <h3 class="text-lg font-semibold text-gray-800">${cat.Name}</h3>
-          </div>
-        `;
-          catCard.addEventListener("click", () => {
-            currentCategory = cat;
-            renderMenuItems(serviceId, cat.ID, `${serviceName} - ${cat.Name}`);
+        res.data.forEach((category) => {
+          const categoryCard = document.createElement("div");
+          categoryCard.className =
+            "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
+          categoryCard.innerHTML = `
+    <img src="${category.ImageUrl}" alt="${category.Name}" class="w-full h-40 object-cover">
+    <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-lg font-semibold">
+      ${category.Name}
+    </div>
+  `;
+
+          categoryCard.addEventListener("click", () => {
+            currentCategory = category;
+            renderMenuItems(
+              serviceId,
+              category.ID,
+              `${serviceName} - ${category.Name}`
+            );
+            menuTitle.textContent = currentService.Name + " - " + category.Name;
+            pageTitle.textContent = currentService.Name + " - " + category.Name;
+            showScreen(menuItemsScreen);
           });
-          categoriesList.appendChild(catCard);
+
+          categoriesList.appendChild(categoryCard);
         });
+
         categoryTitle.textContent = serviceName + " - Danh Mục";
         showScreen(document.getElementById("categoryScreen"));
       } else {
-        showToast("Lỗi lấy nhóm mặt hàng", "error");
+        showToast("Không lấy được danh mục", "error");
       }
-    } catch (e) {
-      showToast("Lỗi kết nối API", "error");
+    } catch (err) {
+      showToast("Lỗi kết nối danh mục", "error");
     }
   }
+
   async function renderMenuItems(serviceId, categoryId, title) {
     try {
       const res = await fetchAPI("GetSaleItems", "POST", {
         ID: serviceId,
         CategoryID: categoryId,
       });
-      if (!res.error) {
+
+      if (res.error) {
         const list = document.getElementById("menuItemsList");
         list.innerHTML = "";
+
         res.data.forEach((item) => {
           const itemCard = document.createElement("div");
           itemCard.className =
             "card bg-white rounded-lg shadow-md overflow-hidden";
           itemCard.innerHTML = `
-          <div class="p-4">
-            <div class="flex justify-between items-start">
-              <h3 class="text-lg font-semibold text-gray-800">${item.Name}</h3>
-              <span class="text-indigo-600 font-medium">${item.Price.toLocaleString()} ₫</span>
-            </div>
-            <p class="text-gray-600 mt-1 text-sm">${item.Description || ""}</p>
-            <div class="mt-4 flex items-center justify-between">
-              <div class="flex items-center">
-                <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
-                <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
-                <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
-              </div>
-              <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
-            </div>
-          </div>
-        `;
+                        <img src="${item.ImageUrl}" alt="${
+            item.Name
+          }" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-semibold text-gray-800">${
+                                  item.Name
+                                }</h3>
+                                <span class="text-indigo-600 font-medium">${formatPrice(
+                                  item.Price
+                                )}</span>
+                            </div>
+                            <p class="text-gray-600 mt-1 text-sm">${
+                              item.Description
+                            }</p>
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
+                                    <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
+                                    <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
+                                </div>
+                                <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none">Thêm</button>
+                            </div>
+                        </div>
+                    `;
 
           const qtyInput = itemCard.querySelector(".quantity-input");
           itemCard.querySelector(".decrease-qty").onclick = () => {
@@ -597,7 +619,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showToast("Không tải được mặt hàng", "error");
       }
     } catch (e) {
-      showToast("Lỗi kết nối API", "error");
+      showToast("Lỗi kết nối API khi lấy mặt hàng", "error");
     }
   }
 
@@ -750,14 +772,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }, 500);
     }, 3000);
   }
+
+  // Initialize
   updateCartCount();
-
-  initApp();
-});
-
-// DOMContentLoaded
-function initApp() {
-  // Lấy room từ URL
   const params = new URLSearchParams(window.location.search);
   const roomNumber = params.get("room");
   if (roomNumber) {
@@ -768,24 +785,21 @@ function initApp() {
     }
   }
 
-  // 👉 Gọi API lấy danh sách dịch vụ
-  fetchAPI("GetPOSList")
+  // 📦 Gọi API lấy danh sách dịch vụ
+  fetchAPI("GetPOSList", "POST")
     .then((res) => {
-      if (!res.error) {
-        const services = res.data.Categories;
-        renderServices(services);
+      if (res.error) {
+        renderServices(res.data.Categories);
+        showScreen(document.getElementById("serviceScreen"));
+        pageTitle.textContent = "Dịch Vụ";
       } else {
         showToast("Lỗi lấy danh sách dịch vụ", "error");
       }
     })
-    .catch(() => showToast("Lỗi kết nối API", "error"));
-
-  showScreen(serviceScreen);
-  pageTitle.textContent = "Dịch Vụ";
-  document
-    .querySelector('.nav-link[data-screen="serviceScreen"]')
-    .classList.add("active");
-}
+    .catch(() => {
+      showToast("Không thể kết nối máy chủ", "error");
+    });
+});
 
 (function () {
   function c() {
