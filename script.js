@@ -242,15 +242,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const backToShoppingBtn = document.getElementById("backToShoppingBtn");
   const backToShopping = document.getElementById("backToShopping");
   const checkout = document.getElementById("checkout");
-  const scanButton = document.getElementById("scanButton");
+  // const scanButton = document.getElementById("scanButton");
   const newOrder = document.getElementById("newOrder");
   const orderNumber = document.getElementById("orderNumber");
   const emptyCart = document.getElementById("emptyCart");
   const cartContent = document.getElementById("cartContent");
   const navLinks = document.querySelectorAll(".nav-link");
-  const sidebarNhaHang = document.getElementById("sidebarNhaHang");
-  const sidebarThoiTrang = document.getElementById("sidebarThoiTrang");
-  const sidebarDienTu = document.getElementById("sidebarDienTu");
+  // const sidebarNhaHang = document.getElementById("sidebarNhaHang");
+  // const sidebarThoiTrang = document.getElementById("sidebarThoiTrang");
+  // const sidebarDienTu = document.getElementById("sidebarDienTu");
 
   // Sidebar Toggle
   toggleSidebarBtn.addEventListener("click", function () {
@@ -330,23 +330,23 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Service category links in sidebar
-  sidebarNhaHang.addEventListener("click", function (e) {
-    e.preventDefault();
-    const service = services.find((s) => s.id === 1);
-    navigateToService(service);
-  });
+  // sidebarNhaHang.addEventListener("click", function (e) {
+  //   e.preventDefault();
+  //   const service = services.find((s) => s.id === 1);
+  //   navigateToService(service);
+  // });
 
-  sidebarThoiTrang.addEventListener("click", function (e) {
-    e.preventDefault();
-    const service = services.find((s) => s.id === 2);
-    navigateToService(service);
-  });
+  // sidebarThoiTrang.addEventListener("click", function (e) {
+  //   e.preventDefault();
+  //   const service = services.find((s) => s.id === 2);
+  //   navigateToService(service);
+  // });
 
-  sidebarDienTu.addEventListener("click", function (e) {
-    e.preventDefault();
-    const service = services.find((s) => s.id === 3);
-    navigateToService(service);
-  });
+  // sidebarDienTu.addEventListener("click", function (e) {
+  //   e.preventDefault();
+  //   const service = services.find((s) => s.id === 3);
+  //   navigateToService(service);
+  // });
 
   function navigateToService(service) {
     currentService = service;
@@ -368,14 +368,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Event Listeners
-  scanButton.addEventListener("click", function () {
-    // Simulate scanning QR code
-    setTimeout(function () {
-      showScreen(serviceScreen);
-      renderServices();
-      pageTitle.textContent = "Dịch Vụ";
-    }, 1000);
-  });
+  // scanButton.addEventListener("click", function () {
+  //   // Simulate scanning QR code
+  //   setTimeout(function () {
+  //     showScreen(serviceScreen);
+  //     renderServices();
+  //     pageTitle.textContent = "Dịch Vụ";
+  //   }, 1000);
+  // });
 
   backToServices.addEventListener("click", function () {
     showScreen(serviceScreen);
@@ -487,9 +487,22 @@ document.addEventListener("DOMContentLoaded", function () {
     serviceList.forEach((service) => {
       const serviceCard = document.createElement("div");
       serviceCard.className =
-        "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
+        "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
       serviceCard.innerHTML = `
-      <img src="${service.ImageUrl}" alt="${service.Name}" class="w-full h-40 object-cover">
+      ${
+        service.ImageUrl
+          ? `
+        <img src="${service.ImageUrl}" alt="${service.Name}" class="w-full h-40 object-cover">
+      `
+          : `
+        <div class="w-full h-40 bg-gray-400 flex items-center justify-center text-white text-lg font-semibold">
+          ${service.Name}
+        </div>
+      `
+      }
+      <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-lg font-semibold">
+        ${service.Name}
+      </div>
     `;
 
       // 👉 Xử lý khi bấm vào toàn bộ card
@@ -516,13 +529,23 @@ document.addEventListener("DOMContentLoaded", function () {
         res.data.forEach((category) => {
           const categoryCard = document.createElement("div");
           categoryCard.className =
-            "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg relative";
+            "card bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg";
           categoryCard.innerHTML = `
-    <img src="${category.ImageUrl}" alt="${category.Name}" class="w-full h-40 object-cover">
-    <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-lg font-semibold">
-      ${category.Name}
-    </div>
-  `;
+          ${
+            category.ImageUrl
+              ? `
+            <img src="${category.ImageUrl}" alt="${category.Name}" class="w-full h-40 object-cover">
+          `
+              : `
+            <div class="w-full h-40 bg-gray-400 flex items-center justify-center text-white text-lg font-semibold">
+              ${category.Name}
+            </div>
+          `
+          }
+          <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center p-2 text-lg font-semibold">
+            ${category.Name}
+          </div>
+        `;
 
           categoryCard.addEventListener("click", () => {
             currentCategory = category;
@@ -540,7 +563,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         categoryTitle.textContent = serviceName + " - Danh Mục";
-        showScreen(document.getElementById("categoryScreen"));
+        showScreen(categoryScreen);
       } else {
         showToast("Không lấy được danh mục", "error");
       }
@@ -563,33 +586,35 @@ document.addEventListener("DOMContentLoaded", function () {
         res.data.forEach((item) => {
           const itemCard = document.createElement("div");
           itemCard.className =
-            "card bg-white rounded-lg shadow-md overflow-hidden";
+            "card bg-white rounded-lg shadow-md overflow-hidden relative";
           itemCard.innerHTML = `
-                        <img src="${item.ImageUrl}" alt="${
-            item.Name
-          }" class="w-full h-40 object-cover">
-                        <div class="p-4">
-                            <div class="flex justify-between items-start">
-                                <h3 class="text-lg font-semibold text-gray-800">${
-                                  item.Name
-                                }</h3>
-                                <span class="text-indigo-600 font-medium">${formatPrice(
-                                  item.Price
-                                )}</span>
-                            </div>
-                            <p class="text-gray-600 mt-1 text-sm">${
-                              item.Description
-                            }</p>
-                            <div class="mt-4 flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
-                                    <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
-                                    <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
-                                </div>
-                                <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none">Thêm</button>
-                            </div>
-                        </div>
-                    `;
+          ${
+            item.ImageUrl
+              ? `
+            <img src="${item.ImageUrl}" alt="${item.Name}" class="w-full h-40 object-cover">
+          `
+              : `
+            <div class="w-full h-40 bg-gray-400 flex items-center justify-center text-white text-lg font-semibold">
+              ${item.Name}
+            </div>
+          `
+          }
+          <div class="p-4">
+            <div class="flex justify-between items-start">
+              <h3 class="text-lg font-semibold text-gray-800">${item.Name}</h3>
+              <span class="text-indigo-600 font-medium">${item.Price.toLocaleString()} ₫</span>
+            </div>
+            <p class="text-gray-600 mt-1 text-sm">${item.Description || ""}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <div class="flex items-center">
+                <button class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300">-</button>
+                <input type="number" min="1" value="1" class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center">
+                <button class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300">+</button>
+              </div>
+              <button class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Thêm</button>
+            </div>
+          </div>
+        `;
 
           const qtyInput = itemCard.querySelector(".quantity-input");
           itemCard.querySelector(".decrease-qty").onclick = () => {
