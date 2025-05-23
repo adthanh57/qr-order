@@ -239,41 +239,6 @@
         </header>
         <!-- Main Content -->
         <main class="flex-1 max-w-7xl px-2 sm:px-4 md:px-6 lg:px-8 py-8">
-          <!-- QR Scanner Screen -->
-          <!-- <div class="block hidden" id="qrScreen">
-            <div class="text-center mb-8">
-              <h2 class="text-2xl font-bold text-gray-800 mb-2">Quét Mã QR</h2>
-              <p class="text-gray-600">
-                Quét mã QR để xem menu hoặc danh mục sản phẩm
-              </p>
-            </div>
-            <div class="qr-scanner mx-auto mb-8">
-              <div class="qr-corners">
-                <span> </span>
-              </div>
-              <div class="flex items-center justify-center h-full">
-                <svg
-                  class="h-32 w-32 text-gray-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewbox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-            <div class="text-center">
-              <button class="btn-primary py-2 px-6 rounded-md" id="scanButton">
-                Quét Mã
-              </button>
-            </div>
-          </div> -->
           <!-- Service Screen -->
           <div class="hidden" id="serviceScreen">
             <div class="flex items-center mb-6">
@@ -282,78 +247,7 @@
             <div
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               id="servicesList"
-            >
-              <div
-                class="service-btn card bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <img
-                  alt="Nhà Hàng"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%234f46e5'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ENhà Hàng%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">Nhà Hàng</h3>
-                  <p class="text-gray-600 mt-1">Đặt món ăn ngon</p>
-                  <button
-                    class="service-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Chọn
-                  </button>
-                </div>
-              </div>
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Thời Trang"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EThời Trang%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">
-                    Thời Trang
-                  </h3>
-                  <p class="text-gray-600 mt-1">Quần áo, phụ kiện</p>
-                  <button
-                    class="service-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Chọn
-                  </button>
-                </div>
-              </div>
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Điện Tử"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2310b981'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EĐiện Tử%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">Điện Tử</h3>
-                  <p class="text-gray-600 mt-1">Thiết bị công nghệ</p>
-                  <button
-                    class="service-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Chọn
-                  </button>
-                </div>
-              </div>
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Gói Dịch Vụ"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23a855f7'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EGói Dịch Vụ%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">
-                    Gói Dịch Vụ
-                  </h3>
-                  <p class="text-gray-600 mt-1">Dịch vụ trọn gói</p>
-                  <button
-                    class="service-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Thêm vào giỏ
-                  </button>
-                </div>
-              </div>
-            </div>
+            ></div>
           </div>
           <!-- Category Screen -->
           <div class="" id="categoryScreen">
@@ -382,53 +276,7 @@
             <div
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               id="categoriesList"
-            >
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Món Chính"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23ef4444'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EMón Chính%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">Món Chính</h3>
-                  <button
-                    class="category-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Xem
-                  </button>
-                </div>
-              </div>
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Món Phụ"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EMón Phụ%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">Món Phụ</h3>
-                  <button
-                    class="category-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Xem
-                  </button>
-                </div>
-              </div>
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Đồ Uống"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2310b981'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3EĐồ Uống%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <h3 class="text-lg font-semibold text-gray-800">Đồ Uống</h3>
-                  <button
-                    class="category-btn mt-3 w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Xem
-                  </button>
-                </div>
-              </div>
-            </div>
+            ></div>
           </div>
           <!-- Menu Items Screen -->
           <div class="hidden" id="menuItemsScreen">
@@ -457,49 +305,7 @@
             <div
               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
               id="menuItemsList"
-            >
-              <div class="card bg-white rounded-lg shadow-md overflow-hidden">
-                <img
-                  alt="Salad"
-                  class="w-full h-40 object-cover"
-                  src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%2334d399'/%3E%3Ctext x='50%25' y='50%25' font-size='32' text-anchor='middle' alignment-baseline='middle' font-family='Arial, sans-serif' fill='white'%3ESalad%3C/text%3E%3C/svg%3E"
-                />
-                <div class="p-4">
-                  <div class="flex justify-between items-start">
-                    <h3 class="text-lg font-semibold text-gray-800">Salad</h3>
-                    <span class="text-indigo-600 font-medium"> 45.000 ₫ </span>
-                  </div>
-                  <p class="text-gray-600 mt-1 text-sm">
-                    Rau organic, dầu olive, ships from Vietnam, warranty 1 ngày
-                  </p>
-                  <div class="mt-4 flex items-center justify-between">
-                    <div class="flex items-center">
-                      <button
-                        class="decrease-qty bg-gray-200 px-2 py-1 rounded-l-md hover:bg-gray-300"
-                      >
-                        -
-                      </button>
-                      <input
-                        class="quantity-input border-t border-b border-gray-300 py-1 px-2 w-12 text-center"
-                        min="1"
-                        type="number"
-                        value="1"
-                      />
-                      <button
-                        class="increase-qty bg-gray-200 px-2 py-1 rounded-r-md hover:bg-gray-300"
-                      >
-                        +
-                      </button>
-                    </div>
-                    <button
-                      class="add-to-cart py-1 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none"
-                    >
-                      Thêm
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ></div>
           </div>
           <!-- Shopping Cart Screen -->
           <div class="hidden w-full mx-auto" id="cartScreen">
