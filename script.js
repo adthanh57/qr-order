@@ -189,17 +189,6 @@ document.addEventListener("DOMContentLoaded", function () {
     pageTitle.textContent = "Dịch Vụ";
   });
 
-  // applyPromoButton.addEventListener("click", function () {
-  //   const code = promoCodeInput.value.trim().toUpperCase();
-  //   if (promoCodes[code] !== undefined) {
-  //     discount = promoCodes[code];
-  //     updateCartUI();
-  //     showToast(`Mã giảm giá ${code} đã được áp dụng!`);
-  //   } else {
-  //     showToast("Mã giảm giá không hợp lệ!", "error");
-  //   }
-  // });
-
   checkout.addEventListener("click", function () {
     if (cart.length === 0) {
       showToast("Giỏ hàng của bạn đang trống!", "error");
@@ -576,3 +565,4 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Không thể kết nối máy chủ", "error");
     });
 });
+
