@@ -186,37 +186,27 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   function showScreen(screen) {
-    // ✅ Danh sách các màn hình yêu cầu thông tin khách hàng
     const protectedScreens = [
       "serviceScreen",
       "categoryScreen",
       "menuItemsScreen",
     ];
-
-    // ⛔ Nếu chưa nhập thông tin khách và muốn truy cập màn yêu cầu -> chặn
     if (
       protectedScreens.includes(screen.id) &&
-      (!window.guestData ||
-        !window.guestData.GuestName ||
-        !window.guestData.Phone)
+      (!window.guestData?.GuestName || !window.guestData?.Phone)
     ) {
       showToast("Vui lòng nhập thông tin khách hàng trước!", "error");
-      showGuestForm();
-      return;
+      return handleGuestInfoButton();
     }
 
-    // ✅ Ẩn toàn bộ màn hình trước khi hiển thị cái mới
     document
       .querySelectorAll(
         "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
       )
       .forEach((el) => el.classList.add("hidden"));
 
-    // ✅ Hiển thị màn hình được yêu cầu
     screen.classList.remove("hidden");
     screen.classList.add("fade-in");
-
-    // Xóa hiệu ứng sau khi hoàn tất
     setTimeout(() => screen.classList.remove("fade-in"), 500);
   }
 
@@ -587,6 +577,72 @@ document.addEventListener("DOMContentLoaded", function () {
       createButton(">", currentPage + 1, false, currentPage === totalPages)
     );
   }
+  function updateContactScreen() {
+    const guest = window.guestData;
+    if (!guest) return;
+
+    const fields = [
+      { key: "GuestName", label: "Tên khách hàng" },
+      { key: "Phone", label: "Số điện thoại" },
+      { key: "Email", label: "Email" },
+      { key: "Address", label: "Địa chỉ" },
+      { key: "IdentifyNo", label: "CMND/Hộ chiếu" },
+      { key: "Note", label: "Ghi chú" },
+    ];
+
+    const container = document.getElementById("contactGuestInfo");
+    if (!container) return;
+
+    container.innerHTML = fields
+      .map(({ key, label }) =>
+        guest[key]
+          ? `<p class="mb-2"><strong>${label}:</strong> ${guest[key]}</p>`
+          : ""
+      )
+      .join("");
+  }
+  function handleGuestInfoButton() {
+    const formScreen = document.getElementById("guestFormScreen");
+    const roomNumber = extractRoomNumber();
+    if (!roomNumber) return showScreen(formScreen);
+
+    const useGuestData = (guest) => {
+      window.guestData = guest;
+      const hasInfo = guest?.GuestName?.trim() && guest?.Phone?.trim();
+      if (hasInfo) return showGuestInfo();
+
+      showScreen(formScreen);
+      const fields = [
+        "GuestName",
+        "Phone",
+        "Email",
+        "Address",
+        "IdentifyNo",
+        "Note",
+      ];
+      fields.forEach((key) => {
+        const input = formScreen.querySelector(`[name="${key}"]`);
+        if (input && guest[key]) input.value = guest[key];
+      });
+    };
+
+    if (window.guestData) return useGuestData(window.guestData);
+
+    fetchAPI("GetGuestInfo", "POST", { RoomNo: roomNumber })
+      .then((res) => {
+        const guest = res?.data?.[0];
+        if (guest) useGuestData(guest);
+        else {
+          showToast("Không tìm thấy thông tin khách", "error");
+          showScreen(formScreen);
+        }
+      })
+      .catch(() => {
+        showToast("Lỗi khi lấy thông tin khách", "error");
+        showScreen(formScreen);
+      });
+  }
+
   function showGuestForm() {
     const formScreen = document.getElementById("guestFormScreen");
 
@@ -694,23 +750,26 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function showGuestInfo() {
     const guestInfoScreen = document.getElementById("guestInfoScreen");
-    const guestForm = document.getElementById("guestInfoForm");
-    let qr = new URLSearchParams(window.location.search).get("qr");
-    if (!qr) {
-      const match = window.location.href.match(/([0-9]+)#Room#/);
-      if (match) qr = `${match[1]}#Room#`;
-    }
+    const guest = window.guestData;
     const roomNumber = extractRoomNumber();
+
     let infoHtml = `<p class="mb-2"><strong>Số phòng:</strong> ${roomNumber}</p>`;
-    ["GuestName", "Phone", "Email", "Address", "IdentifyNo", "Note"].forEach(
-      (field) => {
-        const input = guestForm.querySelector(`[name='${field}']`);
-        if (input && input.value) {
-          const label = input.placeholder || field;
-          infoHtml += `<p class="mb-2"><strong>${label}:</strong> ${input.value}</p>`;
-        }
+
+    const fields = [
+      { key: "GuestName", label: "Tên khách hàng" },
+      { key: "Phone", label: "Số điện thoại" },
+      { key: "Email", label: "Email" },
+      { key: "Address", label: "Địa chỉ" },
+      { key: "IdentifyNo", label: "CMND/Hộ chiếu" },
+      { key: "Note", label: "Ghi chú" },
+    ];
+
+    fields.forEach(({ key, label }) => {
+      const value = guest?.[key];
+      if (value && value.trim()) {
+        infoHtml += `<p class="mb-2"><strong>${label}:</strong> ${value}</p>`;
       }
-    );
+    });
 
     guestInfoScreen.innerHTML = `
     <div class="p-6 max-w-lg mx-auto bg-white rounded-lg shadow text-left">
@@ -734,7 +793,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("contactEmail").textContent = hotel.Email || "...";
     document.getElementById("contactAddress").textContent =
       hotel.Address || "...";
-
+    updateContactScreen();
     showScreen(document.getElementById("contactScreen"));
   }
 
@@ -1067,6 +1126,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.showGuestInfo = showGuestInfo;
   window.showWelcomeScreen = loadWelcomeScreen;
   window.submitGuestOrder = submitGuestOrder;
+  window.handleGuestInfoButton = handleGuestInfoButton;
   window.cart = cart;
   window.currentService = currentService;
   window.showContactScreen = showContactScreen;
