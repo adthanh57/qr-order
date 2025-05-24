@@ -66,7 +66,7 @@
               class="ml-5 text-xl font-bold text-gray-800 sidebar-item-text"
               onclick="showWelcomeScreen()"
             >
-              QR Shop
+              QR Hotel
             </h1>
           </div>
           <button
@@ -163,6 +163,28 @@
                 </span>
               </a>
             </li>
+            <li>
+              <a
+                href="#"
+                onclick="showContactScreen()"
+                class="sidebar-item flex items-center px-4 py-3"
+              >
+                <svg
+                  class="h-6 w-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                </svg>
+                <span class="ml-3 sidebar-item-text">Liên hệ</span>
+              </a>
+            </li>
             <li class="border-t border-gray-200 my-2"></li>
             <div id="sidebarDynamicServices"></div>
           </ul>
@@ -205,7 +227,7 @@
           class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"
         >
           <div class="flex items-center">
-            <h1 class="text-xl font-bold text-gray-800 ml-14" id="pageTitle">
+            <h1 class="text-xl font-bold text-gray-800 ml-14" id="hotelTitle">
               Nhà Hàng - Danh Mục
               <span id="roomInfo" class="text-sm text-gray-500 ml-2"></span>
             </h1>
@@ -239,31 +261,85 @@
           </div>
         </div>
       </header>
-      <div
-        class="min-h-screen flex flex-col items-center justify-center bg-gray-50 text-center px-4 hidden"
-        id="welcomeScreen"
-      >
-        <div class="fade-in">
-          <img
-            id="hotelLogo"
-            class="mx-auto h-32 mb-4 rounded-lg object-cover"
-          />
-          <h1 id="hotelName" class="text-3xl font-bold mb-2"></h1>
-          <p id="hotelDetails" class="text-gray-600"></p>
-          <button
-            class="mt-6 btn-primary py-2 px-6 rounded-md"
-            onclick="showGuestForm()"
+      <!-- Welcome Screen -->
+      <div class="hidden" id="welcomeScreen">
+        <div
+          class="relative min-h-screen flex items-center justify-center overflow-hidden"
+        >
+          <div
+            class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style="
+              background-image: linear-gradient(
+                  rgba(0, 0, 0, 0.5),
+                  rgba(0, 0, 0, 0.7)
+                ),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80');
+            "
+          ></div>
+
+          <div
+            class="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto"
           >
-            Bắt đầu
-          </button>
+            <div class="bg-black bg-opacity-30 backdrop-blur-sm p-8 rounded-xl">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/2534/2534000.png"
+                alt="Logo khách sạn"
+                class="w-24 h-24 mx-auto mb-6"
+              />
+
+              <div
+                class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold mb-4 bg-white/20 text-white border-white/30 backdrop-blur-sm"
+              >
+                ⭐ Khách sạn 5 sao
+              </div>
+
+              <h1
+                class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 leading-tight"
+              >
+                Chào mừng đến với
+                <span class="block text-yellow-400 mt-2" id="hotelName"
+                  >Royal Paradise Hotel</span
+                >
+              </h1>
+
+              <!-- Thông tin khách sạn -->
+              <p id="hotelPhone" class="text-gray-300 text-base mb-1">
+                Hotline: ...
+              </p>
+              <p id="hotelAddress" class="text-gray-300 text-sm mb-1">
+                Địa chỉ: ...
+              </p>
+              <p id="hotelEmail" class="text-gray-300 text-sm mb-4">
+                Email: ...
+              </p>
+
+              <p class="text-lg text-gray-200 mb-6" id="roomInfoWelcome">
+                (Phòng <span id="roomNoText">...</span>)
+              </p>
+
+              <div
+                class="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              >
+                <button
+                  class="btn-primary px-8 py-3 text-lg rounded-md"
+                  id="goToServicesBtn"
+                >
+                  Xem dịch vụ
+                </button>
+                <button
+                  class="btn-secondary px-8 py-3 text-lg rounded-md"
+                  onclick="showGuestForm()"
+                >
+                  Thông tin khách
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Guest Information Form -->
-      <div
-        class="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-8 hidden"
-        id="guestFormScreen"
-      >
+      <div class="px-4 py-8 hidden" id="guestFormScreen">
         <form
           id="guestInfoForm"
           class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
@@ -280,6 +356,8 @@
             type="tel"
             name="Phone"
             placeholder="Số điện thoại *"
+            pattern="0\d{9}"
+            maxlength="10"
             class="w-full border rounded-md p-2"
             required
           />
@@ -566,6 +644,28 @@
           <button class="mt-8 btn-primary py-2 px-6 rounded-md" id="newOrder">
             Đặt Hàng Mới
           </button>
+        </div>
+        <div class="hidden fade-in text-center py-10" id="contactScreen">
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Liên hệ khách sạn
+          </h2>
+          <div
+            class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow text-left"
+          >
+            <p class="mb-2">
+              <strong>Tên khách sạn:</strong>
+              <span id="contactHotelName">...</span>
+            </p>
+            <p class="mb-2">
+              <strong>Điện thoại:</strong> <span id="contactPhone">...</span>
+            </p>
+            <p class="mb-2">
+              <strong>Email:</strong> <span id="contactEmail">...</span>
+            </p>
+            <p class="mb-2">
+              <strong>Địa chỉ:</strong> <span id="contactAddress">...</span>
+            </p>
+          </div>
         </div>
       </main>
     </div>

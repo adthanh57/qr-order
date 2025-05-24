@@ -16,6 +16,7 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  let guestData = null;
   let cart = [];
   let currentService = null;
   let currentCategory = null;
@@ -30,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const closeMobileMenuBtn = document.getElementById("closeMobileMenu");
   const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
   const sidebarItemTexts = document.querySelectorAll(".sidebar-item-text");
-  const pageTitle = document.getElementById("pageTitle");
   const serviceScreen = document.getElementById("serviceScreen");
   const categoryScreen = document.getElementById("categoryScreen");
   const menuItemsScreen = document.getElementById("menuItemsScreen");
@@ -118,14 +118,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       this.classList.add("active");
 
-      // Update page title
-      if (targetScreen === "serviceScreen") {
-        pageTitle.textContent = "Dịch Vụ";
-      } else if (targetScreen === "cartScreen") {
-        pageTitle.textContent = "Giỏ Hàng";
-        updateCartUI();
-      }
-
       // Show the target screen
       showScreen(document.getElementById(targetScreen));
 
@@ -137,7 +129,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function navigateToService(service) {
     currentService = service;
-    pageTitle.textContent = service.Name;
 
     if (service.hasCategories) {
       renderCategories(service.id);
@@ -156,39 +147,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
   backToServices.addEventListener("click", function () {
     showScreen(serviceScreen);
-    pageTitle.textContent = "Dịch Vụ";
   });
 
   backButton.addEventListener("click", function () {
     if (currentCategory) {
       showScreen(categoryScreen);
-      pageTitle.textContent = currentService.Name + " - Danh Mục";
       currentCategory = null;
     } else {
       showScreen(serviceScreen);
-      pageTitle.textContent = "Dịch Vụ";
     }
   });
 
   cartButton.addEventListener("click", function () {
     updateCartUI();
     showScreen(cartScreen);
-    pageTitle.textContent = "Giỏ Hàng";
   });
 
   continueShopping.addEventListener("click", function () {
     showScreen(serviceScreen);
-    pageTitle.textContent = "Dịch Vụ";
   });
 
   backToShoppingBtn.addEventListener("click", function () {
     showScreen(serviceScreen);
-    pageTitle.textContent = "Dịch Vụ";
   });
 
   backToShopping.addEventListener("click", function () {
     showScreen(serviceScreen);
-    pageTitle.textContent = "Dịch Vụ";
   });
 
   checkout.addEventListener("click", function () {
@@ -204,7 +188,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Show confirmation screen
     showScreen(confirmationScreen);
-    pageTitle.textContent = "Đặt Hàng Thành Công";
 
     // Reset cart
     cart = [];
@@ -214,22 +197,40 @@ document.addEventListener("DOMContentLoaded", function () {
 
   newOrder.addEventListener("click", function () {
     showScreen(serviceScreen);
-    pageTitle.textContent = "Dịch Vụ";
   });
 
   function showScreen(screen) {
-    if (!screen) {
-      console.warn("⚠️ screen không tồn tại trong DOM");
+    // ✅ Danh sách các màn hình yêu cầu thông tin khách hàng
+    const protectedScreens = [
+      "serviceScreen",
+      "categoryScreen",
+      "menuItemsScreen",
+    ];
+
+    // ⛔ Nếu chưa nhập thông tin khách và muốn truy cập màn yêu cầu -> chặn
+    if (
+      protectedScreens.includes(screen.id) &&
+      (!window.guestData ||
+        !window.guestData.GuestName ||
+        !window.guestData.Phone)
+    ) {
+      showToast("Vui lòng nhập thông tin khách hàng trước!", "error");
+      showGuestForm();
       return;
     }
+
+    // ✅ Ẩn toàn bộ màn hình trước khi hiển thị cái mới
     document
       .querySelectorAll(
-        "#welcomeScreen, #guestFormScreen,#guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
+        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
       )
       .forEach((el) => el.classList.add("hidden"));
 
+    // ✅ Hiển thị màn hình được yêu cầu
     screen.classList.remove("hidden");
     screen.classList.add("fade-in");
+
+    // Xóa hiệu ứng sau khi hoàn tất
     setTimeout(() => screen.classList.remove("fade-in"), 500);
   }
 
@@ -253,7 +254,6 @@ document.addEventListener("DOMContentLoaded", function () {
         currentService = service;
         renderCategories(service.ID, service.Name);
         categoryTitle.textContent = service.Name + " - Danh Mục";
-        pageTitle.textContent = service.Name + " - Danh Mục";
         showScreen(categoryScreen);
       });
 
@@ -311,7 +311,6 @@ document.addEventListener("DOMContentLoaded", function () {
           currentService = service;
           renderCategories(service.ID, service.Name);
           categoryTitle.textContent = service.Name + " - Danh Mục";
-          pageTitle.textContent = service.Name + " - Danh Mục";
           showScreen(categoryScreen);
         });
 
@@ -386,7 +385,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 `${serviceName} - ${category.Name}`
               );
               menuTitle.textContent = `${serviceName} - ${category.Name}`;
-              pageTitle.textContent = `${serviceName} - ${category.Name}`;
               showScreen(menuItemsScreen);
             });
 
@@ -625,14 +623,35 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchAPI("GetHotelInfo", "POST").then((res) => {
       if (res.data) {
         const hotel = res.data;
-        document.getElementById("hotelLogo").src = hotel.ImageUrl;
-        document.getElementById("hotelName").textContent = hotel.Name;
-        document.getElementById("hotelName").style.color =
-          hotel.WelcomeFontColor;
-        document.getElementById(
-          "hotelDetails"
-        ).innerHTML = `${hotel.Address} | ${hotel.Phone} | ${hotel.Email}`;
-        showScreen(welcomeScreen);
+        window.hotelInfo = hotel;
+        document.getElementById("hotelName").textContent =
+          hotel.Name || "Khách sạn";
+        if (hotel.WelcomeFontColor) {
+          document.getElementById("hotelName").style.color =
+            hotel.WelcomeFontColor;
+        }
+        document.getElementById("hotelTitle").textContent =
+          hotel.Name || "Khách sạn";
+        if (hotel.WelcomeFontColor) {
+          document.getElementById("hotelTitle").style.color =
+            hotel.WelcomeFontColor;
+        }
+
+        // Không dùng ảnh từ API => logo giữ nguyên
+        document.getElementById("hotelPhone").textContent = `Hotline: ${
+          hotel.Phone || "..."
+        }`;
+        document.getElementById("hotelAddress").textContent = `Địa chỉ: ${
+          hotel.Address || "..."
+        }`;
+        document.getElementById("hotelEmail").textContent = `Email: ${
+          hotel.Email || "..."
+        }`;
+
+        const roomText = document.getElementById("roomNoText");
+        if (roomNumber && roomText) roomText.textContent = roomNumber;
+
+        showScreen(document.getElementById("welcomeScreen"));
       } else {
         showToast("Không lấy được thông tin khách sạn", "error");
       }
@@ -666,6 +685,23 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>`;
 
     showScreen(guestInfoScreen);
+  }
+
+  function showContactScreen() {
+    const hotel = window.hotelInfo;
+    if (!hotel) {
+      showToast("Thông tin khách sạn chưa sẵn sàng", "error");
+      return;
+    }
+
+    document.getElementById("contactHotelName").textContent =
+      hotel.Name || "...";
+    document.getElementById("contactPhone").textContent = hotel.Phone || "...";
+    document.getElementById("contactEmail").textContent = hotel.Email || "...";
+    document.getElementById("contactAddress").textContent =
+      hotel.Address || "...";
+
+    showScreen(document.getElementById("contactScreen"));
   }
 
   function submitGuestOrder(cart, currentService) {
@@ -886,13 +922,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize
   updateCartCount();
-  const params = new URLSearchParams(window.location.search);
-  const roomNumber = params.get("room");
+  let roomNumber = new URLSearchParams(window.location.search).get("room");
+
+  // Nếu không lấy được từ `?room=`, thử trích từ dạng `?2104#Room#`
+  if (!roomNumber) {
+    const match = window.location.href.match(/([0-9]+)#Room#/);
+    if (match) {
+      roomNumber = match[1];
+    }
+  }
   if (roomNumber) {
     currentRoom = roomNumber;
+
     const roomInfoEl = document.getElementById("roomInfo");
     if (roomInfoEl) {
       roomInfoEl.textContent = `(Phòng ${currentRoom})`;
+    }
+
+    const roomText = document.getElementById("roomNoText");
+    if (roomText) {
+      roomText.textContent = currentRoom;
     }
   }
 
@@ -910,18 +959,32 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Không thể kết nối máy chủ", "error");
     });
   loadWelcomeScreen();
-
+  // Gắn sự kiện nút "Xem dịch vụ"
+  document.getElementById("goToServicesBtn")?.addEventListener("click", () => {
+    showScreen(document.getElementById("serviceScreen"));
+  });
+  // Gắn sự kiện nút "Xem dịch vụ"
+  document.getElementById("hotelTitle")?.addEventListener("click", () => {
+    showScreen(document.getElementById("serviceScreen"));
+  });
   // Xử lý form thông tin khách
 
   if (guestForm) {
     guestForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const form = e.target;
-      const guestData = Object.fromEntries(new FormData(form).entries());
+      guestData = Object.fromEntries(new FormData(form).entries());
 
       if (!guestData.GuestName || !guestData.Phone) {
         document.getElementById("guestFormError").textContent =
           "Vui lòng điền đầy đủ thông tin bắt buộc.";
+        document.getElementById("guestFormError").classList.remove("hidden");
+        return;
+      }
+
+      if (!/^0\d{9}$/.test(guestData.Phone)) {
+        document.getElementById("guestFormError").textContent =
+          "Số điện thoại phải bắt đầu bằng số 0 và gồm đúng 10 chữ số.";
         document.getElementById("guestFormError").classList.remove("hidden");
         return;
       }
@@ -956,4 +1019,5 @@ document.addEventListener("DOMContentLoaded", function () {
   window.submitGuestOrder = submitGuestOrder;
   window.cart = cart;
   window.currentService = currentService;
+  window.showContactScreen = showContactScreen;
 });
