@@ -160,21 +160,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   cartButton.addEventListener("click", function () {
     updateCartUI();
+    updateCartCount();
     showScreen(cartScreen);
   });
 
   continueShopping.addEventListener("click", function () {
     updateCartUI();
+    updateCartCount();
     showScreen(serviceScreen);
   });
 
   backToShoppingBtn.addEventListener("click", function () {
     updateCartUI();
+    updateCartCount();
     showScreen(serviceScreen);
   });
 
   backToShopping.addEventListener("click", function () {
     updateCartUI();
+    updateCartCount();
     showScreen(serviceScreen);
   });
 
@@ -201,7 +205,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document
       .querySelectorAll(
-        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
+        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen,#contactScreen"
       )
       .forEach((el) => el.classList.add("hidden"));
 
@@ -869,7 +873,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const orderNo = res.data?.OrderNo ? res.data?.OrderNo : "--";
         document.getElementById("orderNumber").textContent = orderNo;
         window.cart = [];
-        window.updateCartCount?.();
+        updateCartUI();
+        updateCartCount();
         showScreen(document.getElementById("confirmationScreen"));
       })
       .catch(() => {
