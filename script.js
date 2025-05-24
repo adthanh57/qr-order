@@ -164,14 +164,17 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   continueShopping.addEventListener("click", function () {
+    updateCartUI();
     showScreen(serviceScreen);
   });
 
   backToShoppingBtn.addEventListener("click", function () {
+    updateCartUI();
     showScreen(serviceScreen);
   });
 
   backToShopping.addEventListener("click", function () {
+    updateCartUI();
     showScreen(serviceScreen);
   });
 
