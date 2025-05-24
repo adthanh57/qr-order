@@ -766,7 +766,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const match = window.location.href.match(/([0-9]+)#Room#/);
       if (match) qr = `${match[1]}#Room#...`;
     }
-    const roomNo = qr && qr.includes("Room") ? qr.split("#")[0] : "";
+    const roomNo = extractRoomNumber();
 
     const orderDetails = cart.map((item) => ({
       GuestOrderID: "",
@@ -790,7 +790,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     const payload = {
       ID: "",
-      GuestID: "",
+      GuestID: window.guestData?.ID || "",
       GuestName: window.guestData.GuestName,
       PhoneNumber: window.guestData.Phone,
       Email: window.guestData.Email || "",
