@@ -17,7 +17,7 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
 
 document.addEventListener("DOMContentLoaded", function () {
   let guestData = null;
-  let cart = [];
+  window.cart = [];
   let currentService = null;
   let currentCategory = null;
   let discount = 0;
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function navigateToService(service) {
     currentService = service;
-
+    window.currentService = service;
     if (service.hasCategories) {
       renderCategories(service.id);
       categoryTitle.textContent = service.Name + " - Danh Mục";
@@ -175,27 +175,10 @@ document.addEventListener("DOMContentLoaded", function () {
     showScreen(serviceScreen);
   });
 
-  checkout.addEventListener("click", function () {
-    if (cart.length === 0) {
-      showToast("Giỏ hàng của bạn đang trống!", "error");
-      return;
-    }
-
-    // Generate random order number
-    const randomOrderNumber =
-      "ORD" + Math.floor(100000 + Math.random() * 900000);
-    orderNumber.textContent = randomOrderNumber;
-
-    // Show confirmation screen
-    showScreen(confirmationScreen);
-
-    // Reset cart
-    cart = [];
-    updateCartCount();
-    updateCartUI();
-  });
-
   newOrder.addEventListener("click", function () {
+    window.cart = [];
+    updateCartUI();
+    updateCartCount();
     showScreen(serviceScreen);
   });
 
@@ -309,6 +292,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         serviceCard.addEventListener("click", function () {
           currentService = service;
+          window.currentService = service;
           renderCategories(service.ID, service.Name);
           categoryTitle.textContent = service.Name + " - Danh Mục";
           showScreen(categoryScreen);
@@ -486,6 +470,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 quantity: parseInt(qtyInput.value),
                 image: item.ImageUrl || "",
                 details: item.Description || "",
+                posId: serviceId,
               });
               showToast(`Đã thêm ${item.Name}`);
             };
@@ -742,10 +727,18 @@ document.addEventListener("DOMContentLoaded", function () {
       Qty: item.quantity,
       Price: item.price,
       Total: item.price * item.quantity,
+      PosID: item.posId || "",
     }));
 
     const totalAmount = orderDetails.reduce((sum, item) => sum + item.Total, 0);
-
+    if (!currentService || !currentService.ID) {
+      console.error(
+        "⚠️ currentService chưa được thiết lập đúng:",
+        currentService
+      );
+      showToast("Chưa chọn dịch vụ phù hợp", "error");
+      return;
+    }
     const payload = {
       ID: "",
       GuestID: "",
@@ -762,8 +755,11 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     fetchAPI("UpdateGuestOrder", "POST", payload)
-      .then(() => {
+      .then((res) => {
         showToast("Đặt hàng thành công!");
+        // ✅ Gán OrderNo vào confirmationScreen
+        const orderNo = res.data?.OrderNo ? res.data?.OrderNo : "--";
+        document.getElementById("orderNumber").textContent = orderNo;
         window.cart = [];
         window.updateCartCount?.();
         showScreen(document.getElementById("confirmationScreen"));
@@ -773,25 +769,23 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
   function addToCart(item) {
-    const existingItem = cart.find((i) => i.id === item.id);
-
+    const existingItem = window.cart.find((i) => i.id === item.id);
     if (existingItem) {
       existingItem.quantity += item.quantity;
     } else {
-      cart.push(item);
+      window.cart.push(item);
     }
-
     updateCartCount();
   }
 
   function updateCartCount() {
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
+    const count = window.cart.reduce((total, item) => total + item.quantity, 0);
     cartCount.textContent = count;
     sidebarCartCount.textContent = count;
   }
 
   function updateCartUI() {
-    if (cart.length === 0) {
+    if (window.cart.length === 0) {
       emptyCart.classList.remove("hidden");
       cartContent.classList.add("hidden");
       return;
@@ -968,7 +962,14 @@ document.addEventListener("DOMContentLoaded", function () {
     showScreen(document.getElementById("serviceScreen"));
   });
   // Xử lý form thông tin khách
-
+  cartButton.addEventListener("click", function () {
+    if (!window.currentService || !window.currentService.ID) {
+      showToast("Bạn cần chọn dịch vụ trước khi thanh toán", "error");
+      return;
+    }
+    updateCartUI();
+    showScreen(cartScreen);
+  });
   if (guestForm) {
     guestForm.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -1010,6 +1011,14 @@ document.addEventListener("DOMContentLoaded", function () {
         showToast("Giỏ hàng trống", "error");
         return;
       }
+
+      // Kiểm tra dịch vụ đã được chọn chưa
+      if (!window.currentService || !window.currentService.ID) {
+        showToast("Vui lòng chọn dịch vụ trước khi đặt hàng", "error");
+        return;
+      }
+
+      // Gửi đơn hàng thực sự
       submitGuestOrder(window.cart, window.currentService);
     });
   }
