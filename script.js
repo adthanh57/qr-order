@@ -586,24 +586,71 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function showGuestForm() {
     const formScreen = document.getElementById("guestFormScreen");
-    showScreen(formScreen);
 
     setTimeout(() => {
-      const qr = new URLSearchParams(window.location.search).get("qr");
-      if (qr && qr.includes("Room")) {
-        const roomNumber = qr.split("#")[0];
-        fetchAPI("GetGuestInfo", "POST", { RoomNo: roomNumber }).then(
-          (data) => {
-            Object.entries(data).forEach(([key, value]) => {
+      const roomNumber = extractRoomNumber();
+      if (!roomNumber) {
+        showScreen(formScreen);
+        return;
+      }
+
+      fetchAPI("GetGuestInfo", "POST", { RoomNo: roomNumber }).then((res) => {
+        if (res) {
+          const guest = res.data[0];
+
+          const requiredFields = ["GuestName", "Phone"];
+          const hasEnoughData = requiredFields.every(
+            (field) => guest[field] && guest[field].trim() !== ""
+          );
+
+          // ✅ Lưu vào biến toàn cục
+          window.guestData = guest;
+
+          if (hasEnoughData) {
+            showToast("Đã tự động nhận thông tin khách hàng");
+            showScreen(document.getElementById("serviceScreen"));
+          } else {
+            // Điền form nếu thiếu dữ liệu
+            showScreen(formScreen);
+            const allowedFields = [
+              "GuestName",
+              "Phone",
+              "Email",
+              "Address",
+              "IdentifyNo",
+              "Note",
+            ];
+            allowedFields.forEach((key) => {
               const input = formScreen.querySelector(`[name='${key}']`);
-              if (input) input.value = value;
+              if (input && guest[key]) input.value = guest[key];
             });
           }
-        );
-      }
+        } else {
+          showToast("Không tìm thấy thông tin khách", "error");
+          showScreen(formScreen);
+        }
+      });
     }, 100);
   }
+  function extractRoomNumber() {
+    const params = new URLSearchParams(window.location.search);
 
+    if (params.has("info")) {
+      return params.get("info");
+    }
+
+    if (params.has("qr")) {
+      const qr = decodeURIComponent(params.get("qr"));
+      if (qr.includes("Room")) return qr.split("#")[0];
+    }
+
+    const match = decodeURIComponent(window.location.href).match(
+      /([0-9]+)# ?Room/
+    );
+    if (match) return match[1];
+
+    return null;
+  }
   function loadWelcomeScreen() {
     fetchAPI("GetHotelInfo", "POST").then((res) => {
       if (res.data) {
@@ -650,8 +697,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const match = window.location.href.match(/([0-9]+)#Room#/);
       if (match) qr = `${match[1]}#Room#`;
     }
-    const roomNumber =
-      qr && qr.includes("Room") ? qr.split("#")[0] : "Không rõ";
+    const roomNumber = extractRoomNumber();
     let infoHtml = `<p class="mb-2"><strong>Số phòng:</strong> ${roomNumber}</p>`;
     ["GuestName", "Phone", "Email", "Address", "IdentifyNo", "Note"].forEach(
       (field) => {
@@ -916,15 +962,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize
   updateCartCount();
-  let roomNumber = new URLSearchParams(window.location.search).get("room");
-
-  // Nếu không lấy được từ `?room=`, thử trích từ dạng `?2104#Room#`
-  if (!roomNumber) {
-    const match = window.location.href.match(/([0-9]+)#Room#/);
-    if (match) {
-      roomNumber = match[1];
-    }
-  }
+  const roomNumber = extractRoomNumber();
   if (roomNumber) {
     currentRoom = roomNumber;
 
