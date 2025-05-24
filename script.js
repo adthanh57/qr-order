@@ -1,5 +1,6 @@
 const API_BASE = "https://ezibee.io/api/Intelio";
 const API_AUTH = "Basic " + btoa("intelio:test#api");
+
 async function fetchAPI(endpoint, method = "GET", body = null) {
   const options = {
     method,
@@ -13,6 +14,7 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
   const res = await fetch(`${API_BASE}/${endpoint}`, options);
   return res.json();
 }
+
 document.addEventListener("DOMContentLoaded", function () {
   let cart = [];
   let currentService = null;
@@ -45,8 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const menuTitle = document.getElementById("menuTitle");
   const cartCount = document.getElementById("cartCount");
   const sidebarCartCount = document.getElementById("sidebarCartCount");
-  const subtotalEl = document.getElementById("subtotal");
-  const discountEl = document.getElementById("discount");
   const totalEl = document.getElementById("total");
   const continueShopping = document.getElementById("continueShopping");
   const backToShoppingBtn = document.getElementById("backToShoppingBtn");
@@ -56,8 +56,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const orderNumber = document.getElementById("orderNumber");
   const emptyCart = document.getElementById("emptyCart");
   const cartContent = document.getElementById("cartContent");
+  const welcomeScreen = document.getElementById("welcomeScreen");
+  const guestFormScreen = document.getElementById("guestFormScreen");
   const navLinks = document.querySelectorAll(".nav-link");
-
+  const guestForm = document.getElementById("guestInfoForm");
   // Sidebar Toggle
   toggleSidebarBtn.addEventListener("click", function () {
     isSidebarCollapsed = !isSidebarCollapsed;
@@ -207,6 +209,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Reset cart
     cart = [];
     updateCartCount();
+    updateCartUI();
   });
 
   newOrder.addEventListener("click", function () {
@@ -214,11 +217,14 @@ document.addEventListener("DOMContentLoaded", function () {
     pageTitle.textContent = "Dịch Vụ";
   });
 
-  // Functions
   function showScreen(screen) {
+    if (!screen) {
+      console.warn("⚠️ screen không tồn tại trong DOM");
+      return;
+    }
     document
       .querySelectorAll(
-        "#welcomeScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
+        "#welcomeScreen, #guestFormScreen,#guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen"
       )
       .forEach((el) => el.classList.add("hidden"));
 
@@ -595,7 +601,141 @@ document.addEventListener("DOMContentLoaded", function () {
       createButton(">", currentPage + 1, false, currentPage === totalPages)
     );
   }
+  function showGuestForm() {
+    const formScreen = document.getElementById("guestFormScreen");
+    showScreen(formScreen);
 
+    setTimeout(() => {
+      const qr = new URLSearchParams(window.location.search).get("qr");
+      if (qr && qr.includes("Room")) {
+        const roomNumber = qr.split("#")[0];
+        fetchAPI("GetGuestInfo", "POST", { RoomNo: roomNumber }).then(
+          (data) => {
+            Object.entries(data).forEach(([key, value]) => {
+              const input = formScreen.querySelector(`[name='${key}']`);
+              if (input) input.value = value;
+            });
+          }
+        );
+      }
+    }, 100);
+  }
+
+  function loadWelcomeScreen() {
+    fetchAPI("GetHotelInfo", "POST").then((res) => {
+      if (res.data) {
+        const hotel = res.data;
+        document.getElementById("hotelLogo").src = hotel.ImageUrl;
+        document.getElementById("hotelName").textContent = hotel.Name;
+        document.getElementById("hotelName").style.color =
+          hotel.WelcomeFontColor;
+        document.getElementById(
+          "hotelDetails"
+        ).innerHTML = `${hotel.Address} | ${hotel.Phone} | ${hotel.Email}`;
+        showScreen(welcomeScreen);
+      } else {
+        showToast("Không lấy được thông tin khách sạn", "error");
+      }
+    });
+  }
+  function showGuestInfo() {
+    const guestInfoScreen = document.getElementById("guestInfoScreen");
+    const guestForm = document.getElementById("guestInfoForm");
+    let qr = new URLSearchParams(window.location.search).get("qr");
+    if (!qr) {
+      const match = window.location.href.match(/([0-9]+)#Room#/);
+      if (match) qr = `${match[1]}#Room#`;
+    }
+    const roomNumber =
+      qr && qr.includes("Room") ? qr.split("#")[0] : "Không rõ";
+    let infoHtml = `<p class="mb-2"><strong>Số phòng:</strong> ${roomNumber}</p>`;
+    ["GuestName", "Phone", "Email", "Address", "IdentifyNo", "Note"].forEach(
+      (field) => {
+        const input = guestForm.querySelector(`[name='${field}']`);
+        if (input && input.value) {
+          const label = input.placeholder || field;
+          infoHtml += `<p class="mb-2"><strong>${label}:</strong> ${input.value}</p>`;
+        }
+      }
+    );
+
+    guestInfoScreen.innerHTML = `
+    <div class="p-6 max-w-lg mx-auto bg-white rounded-lg shadow text-left">
+      <h2 class="text-2xl font-bold mb-4 text-indigo-700">Thông tin khách hàng</h2>
+      ${infoHtml}
+    </div>`;
+
+    showScreen(guestInfoScreen);
+  }
+
+  function submitGuestOrder(cart, currentService) {
+    if (
+      !window.guestData ||
+      !window.guestData.GuestName ||
+      !window.guestData.Phone
+    ) {
+      showToast("Thông tin khách hàng không hợp lệ", "error");
+      return;
+    }
+
+    const now = new Date();
+    const currentTime = now
+      .toLocaleString("en-US", {
+        hour12: false,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+      .replace(/\//g, "/");
+
+    let qr = new URLSearchParams(window.location.search).get("qr");
+    if (!qr) {
+      const match = window.location.href.match(/([0-9]+)#Room#/);
+      if (match) qr = `${match[1]}#Room#...`;
+    }
+    const roomNo = qr && qr.includes("Room") ? qr.split("#")[0] : "";
+
+    const orderDetails = cart.map((item) => ({
+      GuestOrderID: "",
+      ID: "",
+      Date: now,
+      ItemID: item.id,
+      Qty: item.quantity,
+      Price: item.price,
+      Total: item.price * item.quantity,
+    }));
+
+    const totalAmount = orderDetails.reduce((sum, item) => sum + item.Total, 0);
+
+    const payload = {
+      ID: "",
+      GuestID: "",
+      GuestName: window.guestData.GuestName,
+      PhoneNumber: window.guestData.Phone,
+      Email: window.guestData.Email || "",
+      RoomNo: roomNo,
+      PosID: currentService?.ID || "",
+      FromDate: currentTime,
+      ToDate: currentTime,
+      OrderDetails: orderDetails,
+      Total: totalAmount,
+      Note: window.guestData.Note || "",
+    };
+
+    fetchAPI("UpdateGuestOrder", "POST", payload)
+      .then(() => {
+        showToast("Đặt hàng thành công!");
+        window.cart = [];
+        window.updateCartCount?.();
+        showScreen(document.getElementById("confirmationScreen"));
+      })
+      .catch(() => {
+        showToast("Lỗi khi gửi đơn hàng", "error");
+      });
+  }
   function addToCart(item) {
     const existingItem = cart.find((i) => i.id === item.id);
 
@@ -717,8 +857,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const discountAmount = subtotal * discount;
     const total = subtotal - discountAmount;
 
-    subtotalEl.textContent = formatPrice(subtotal);
-    discountEl.textContent = formatPrice(discountAmount);
     totalEl.textContent = formatPrice(total);
   }
 
@@ -764,8 +902,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (res.error) {
         renderServices(res.data.Categories);
         renderSidebarServices(res.data.Categories);
-        showScreen(document.getElementById("serviceScreen"));
-        pageTitle.textContent = "Dịch Vụ";
       } else {
         showToast("Lỗi lấy danh sách dịch vụ", "error");
       }
@@ -773,4 +909,51 @@ document.addEventListener("DOMContentLoaded", function () {
     .catch(() => {
       showToast("Không thể kết nối máy chủ", "error");
     });
+  loadWelcomeScreen();
+
+  // Xử lý form thông tin khách
+
+  if (guestForm) {
+    guestForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const guestData = Object.fromEntries(new FormData(form).entries());
+
+      if (!guestData.GuestName || !guestData.Phone) {
+        document.getElementById("guestFormError").textContent =
+          "Vui lòng điền đầy đủ thông tin bắt buộc.";
+        document.getElementById("guestFormError").classList.remove("hidden");
+        return;
+      }
+
+      const btn = document.getElementById("submitGuestForm");
+      btn.disabled = true;
+      btn.textContent = "Đang xử lý...";
+
+      // Lưu dữ liệu khách hàng vào biến toàn cục
+      window.guestData = guestData;
+
+      // Tiếp tục đến màn dịch vụ, không gửi đơn hàng ngay
+      showToast("Thông tin khách hàng đã lưu. Mời chọn dịch vụ.");
+      showScreen(document.getElementById("serviceScreen"));
+      btn.disabled = false;
+      btn.textContent = "Gửi";
+    });
+  }
+
+  if (checkout) {
+    checkout.addEventListener("click", function () {
+      if (!window.cart || window.cart.length === 0) {
+        showToast("Giỏ hàng trống", "error");
+        return;
+      }
+      submitGuestOrder(window.cart, window.currentService);
+    });
+  }
+  window.showGuestForm = showGuestForm;
+  window.showGuestInfo = showGuestInfo;
+  window.showWelcomeScreen = loadWelcomeScreen;
+  window.submitGuestOrder = submitGuestOrder;
+  window.cart = cart;
+  window.currentService = currentService;
 });
