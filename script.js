@@ -112,16 +112,16 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       const targetScreen = this.getAttribute("data-screen");
 
-      // Update active state
-      navLinks.forEach((navLink) => {
-        navLink.classList.remove("active");
-      });
+      // Cập nhật active link
+      navLinks.forEach((navLink) => navLink.classList.remove("active"));
       this.classList.add("active");
 
-      // Show the target screen
-      showScreen(document.getElementById(targetScreen));
+      // ✅ Nếu là giỏ hàng thì cập nhật lại giao diện trước khi hiện
+      if (targetScreen === "cartScreen") {
+        updateCartUI();
+      }
 
-      // Close mobile menu if open
+      showScreen(document.getElementById(targetScreen));
       sidebar.classList.remove("open");
       mobileMenuOverlay.classList.add("hidden");
     });
