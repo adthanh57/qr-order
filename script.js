@@ -91,10 +91,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     `;
     }
   });
-
-  if (localStorage.getItem("staffLoggedIn") === "1") {
-    document.getElementById("staffLoginMenu")?.classList.add("hidden");
-  }
   // Mobile Menu
   mobileMenuBtn.addEventListener("click", function () {
     sidebar.classList.add("open");
@@ -201,11 +197,8 @@ document.addEventListener("DOMContentLoaded", function () {
       "menuItemsScreen",
     ];
 
-    const isStaff = localStorage.getItem("staffLoggedIn") === "1";
-
     if (
       protectedScreens.includes(screen.id) &&
-      !isStaff &&
       (!window.guestData?.GuestName || !window.guestData?.Phone)
     ) {
       showToast("Vui lòng nhập thông tin khách hàng trước!", "error");
@@ -214,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document
       .querySelectorAll(
-        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen, #contactScreen, #staffLoginScreen"
+        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen, #contactScreen"
       )
       .forEach((el) => el.classList.add("hidden"));
 
@@ -1154,28 +1147,6 @@ document.addEventListener("DOMContentLoaded", function () {
       submitGuestOrder(window.cart, window.currentService);
     });
   }
-
-  const staffForm = document.getElementById("staffLoginForm");
-  if (staffForm) {
-    staffForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const form = new FormData(staffForm);
-      const username = form.get("username");
-      const password = form.get("password");
-
-      // ⚠️ Giả lập - thực tế nên call API xác thực
-      if (username === "admin" && password === "123456") {
-        showToast("Đăng nhập thành công");
-        showScreen(document.getElementById("serviceScreen"));
-        localStorage.setItem("staffLoggedIn", "1");
-        // có thể set localStorage/sessionStorage nếu cần
-      } else {
-        document.getElementById("staffLoginError").textContent =
-          "Tên đăng nhập hoặc mật khẩu không đúng";
-        document.getElementById("staffLoginError").classList.remove("hidden");
-      }
-    });
-  }
   window.showGuestForm = showGuestForm;
   window.showGuestInfo = showGuestInfo;
   window.showWelcomeScreen = loadWelcomeScreen;
@@ -1184,13 +1155,4 @@ document.addEventListener("DOMContentLoaded", function () {
   window.cart = cart;
   window.currentService = currentService;
   window.showContactScreen = showContactScreen;
-  window.showStaffLoginScreen = function () {
-    const isStaff = localStorage.getItem("staffLoggedIn") === "1";
-    if (isStaff) {
-      showScreen(document.getElementById("serviceScreen"));
-    } else {
-      showScreen(document.getElementById("staffLoginScreen"));
-    }
-  };
-  window.showStaffLoginScreen = showStaffLoginScreen;
 });
