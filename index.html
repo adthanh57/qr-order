@@ -185,6 +185,28 @@
                 <span class="ml-3 sidebar-item-text">Liên hệ</span>
               </a>
             </li>
+            <li id="staffLoginMenu">
+              <a
+                href="#"
+                onclick="showStaffLoginScreen()"
+                class="sidebar-item flex items-center px-4 py-3"
+              >
+                <svg
+                  class="h-6 w-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                </svg>
+                <span class="ml-3 sidebar-item-text">Nhân viên</span>
+              </a>
+            </li>
             <li class="border-t border-gray-200 my-2"></li>
             <div id="sidebarDynamicServices"></div>
           </ul>
@@ -337,7 +359,39 @@
           </div>
         </div>
       </div>
-
+      <!-- Staff Login Screen -->
+      <div class="hidden py-20" id="staffLoginScreen">
+        <form
+          id="staffLoginForm"
+          class="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-6 space-y-4"
+        >
+          <h2 class="text-2xl font-bold text-center text-indigo-700">
+            Đăng nhập nhân viên
+          </h2>
+          <input
+            type="text"
+            name="username"
+            placeholder="Tên đăng nhập"
+            class="w-full border rounded-md p-2"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Mật khẩu"
+            class="w-full border rounded-md p-2"
+            required
+          />
+          <button
+            type="submit"
+            class="btn-primary py-2 px-4 rounded-md w-full"
+            id="loginStaffBtn"
+          >
+            Đăng nhập
+          </button>
+          <p class="text-sm text-red-500 hidden" id="staffLoginError"></p>
+        </form>
+      </div>
       <!-- Guest Information Form -->
       <div class="px-4 py-8 hidden" id="guestFormScreen">
         <form
