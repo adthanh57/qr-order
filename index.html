@@ -9,6 +9,10 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="./daypilot-pro/daypilot-pro/demo/themes/scheduler_white.css"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body class="flex flex-col min-h-screen">
@@ -224,7 +228,7 @@
       <!-- Header -->
       <header class="bg-white shadow-sm sticky top-0 z-30">
         <div
-          class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"
+          class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"
         >
           <div class="flex items-center">
             <h1 class="text-xl font-bold text-gray-800 ml-14" id="hotelTitle">
@@ -437,7 +441,7 @@
       </div>
       <!-- Main Content -->
       <div id="guestInfoScreen" class="hidden"></div>
-      <main class="flex-1 max-w-7xl px-2 sm:px-4 md:px-6 lg:px-8 py-8">
+      <main class="flex-1 max-w-10xl px-2 sm:px-4 md:px-6 lg:px-8 py-8">
         <!-- Service Screen -->
         <div class="hidden" id="serviceScreen">
           <div class="flex items-center mb-6">
@@ -718,6 +722,158 @@
             <div id="contactGuestInfo"></div>
           </div>
         </div>
+        <!-- ✅ Thêm vùng giao diện scheduler vào index.html -->
+        <div id="miceSchedulerScreen" class="hidden p-4 w-full">
+          <h2 class="text-2xl font-bold mb-4 text-indigo-600">
+            Lịch đặt phòng
+          </h2>
+
+          <!-- Toolbar trên header -->
+          <div
+            id="toolbar"
+            class="flex flex-wrap justify-end items-center gap-3 mb-4"
+          >
+            <label for="datePicker" class="font-medium">Chọn ngày:</label>
+            <input
+              type="date"
+              id="datePicker"
+              class="border rounded px-3 py-1"
+            />
+            <label for="viewMode" class="font-medium">Xem:</label>
+            <select id="viewMode" class="border rounded px-3 py-1">
+              <option value="day">Ngày</option>
+              <option value="week">Tuần</option>
+              <option value="month" selected>Tháng</option>
+            </select>
+          </div>
+
+          <!-- Scheduler Container -->
+          <div id="schedulerContainer" class="bg-white rounded shadow">
+            <div id="dp"></div>
+          </div>
+
+          <!-- Modal Đặt phòng & AlertBox đừa thành phần chung để hiển thị khi showScreen('miceSchedulerScreen') được gọi -->
+          <div
+            id="bookingModal"
+            class="hidden fixed top-10 left-1/2 transform -translate-x-1/2 w-full max-w-6xl bg-white p-6 border border-gray-300 rounded-lg shadow-lg z-50"
+          >
+            <form id="bookingForm" class="space-y-3">
+              <h3 class="text-lg font-semibold mb-2">Đặt phòng</h3>
+              <!-- Số phòng -->
+              <label class="block"
+                >Số phòng <span class="text-red-500">*</span>
+                <input
+                  name="room"
+                  readonly
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Loại phòng -->
+              <label class="block"
+                >Loại phòng <span class="text-red-500">*</span>
+                <select
+                  name="type"
+                  required
+                  id="roomTypeSelect"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                >
+                  <option value="">-- Chọn loại phòng --</option>
+                  <!-- Các option sẽ được thêm bằng JS -->
+                </select>
+              </label>
+
+              <!-- Từ ngày -->
+              <label class="block"
+                >Từ ngày <span class="text-red-500">*</span>
+                <input
+                  name="start"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Đến ngày -->
+              <label class="block"
+                >Đến ngày <span class="text-red-500">*</span>
+                <input
+                  name="end"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Số lượng khách -->
+              <label class="block"
+                >Số lượng khách <span class="text-red-500">*</span>
+                <input
+                  name="guests"
+                  type="number"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Họ tên -->
+              <label class="block"
+                >Họ & tên <span class="text-red-500">*</span>
+                <input
+                  name="name"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- SĐT -->
+              <label class="block"
+                >Số điện thoại <span class="text-red-500">*</span>
+                <input
+                  name="phone"
+                  required
+                  maxlength="10"
+                  pattern="^0\d{9}$"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Email -->
+              <label class="block"
+                >Email
+                <input
+                  name="email"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+              <label class="block"
+                >Ghi chú
+                <textarea
+                  name="note"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                ></textarea>
+              </label>
+              <div class="flex justify-end gap-3">
+                <button
+                  type="submit"
+                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Lưu
+                </button>
+                <button
+                  type="button"
+                  onclick="closeModal()"
+                  class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Hủy
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div
+            id="alertBox"
+            class="hidden fixed top-4 right-4 px-4 py-2 rounded shadow text-white text-sm z-[9999]"
+          ></div>
+        </div>
       </main>
     </div>
     <iframe
@@ -735,4 +891,5 @@
   </body>
 
   <script src="script.js"></script>
+  <script src="./daypilot-pro/daypilot-pro/scripts/daypilot-all.min.js"></script>
 </html>
