@@ -22,7 +22,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentCategory = null;
   let discount = 0;
   let isSidebarCollapsed = false;
-
+  let isStaffLoggedIn = localStorage.getItem("staffLoggedIn") === "1";
+  if (isStaffLoggedIn) {
+    const logoutBtn = document.getElementById("staffLogoutBtn");
+    if (logoutBtn) logoutBtn.classList.remove("hidden");
+  }
   // Elements
   const sidebar = document.getElementById("sidebar");
   const mainContent = document.getElementById("mainContent");
@@ -127,7 +131,28 @@ document.addEventListener("DOMContentLoaded", function () {
       mobileMenuOverlay.classList.add("hidden");
     });
   });
+  document
+    .getElementById("staffLoginForm")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const username = form.username.value.trim();
+      const password = form.password.value.trim();
 
+      // Dummy check — thay bằng gọi API thật nếu có
+      if (username === "admin" && password === "123456") {
+        localStorage.setItem("staffLoggedIn", "1");
+        isStaffLoggedIn = true;
+        const logoutBtn = document.getElementById("staffLogoutBtn");
+        if (logoutBtn) logoutBtn.classList.remove("hidden");
+        showToast("Đăng nhập thành công!");
+        showScreen(document.getElementById("serviceScreen"));
+      } else {
+        document.getElementById("staffLoginError").textContent =
+          "Sai thông tin đăng nhập";
+        document.getElementById("staffLoginError").classList.remove("hidden");
+      }
+    });
   function navigateToService(service) {
     currentService = service;
     window.currentService = service;
@@ -197,8 +222,11 @@ document.addEventListener("DOMContentLoaded", function () {
       "menuItemsScreen",
     ];
 
+    const isStaffLoggedIn = localStorage.getItem("staffLoggedIn") === "1";
+
     if (
       protectedScreens.includes(screen.id) &&
+      !isStaffLoggedIn &&
       (!window.guestData?.GuestName || !window.guestData?.Phone)
     ) {
       showToast("Vui lòng nhập thông tin khách hàng trước!", "error");
@@ -207,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document
       .querySelectorAll(
-        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen, #contactScreen"
+        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen, #contactScreen, #staffLoginScreen"
       )
       .forEach((el) => el.classList.add("hidden"));
 
@@ -648,7 +676,21 @@ document.addEventListener("DOMContentLoaded", function () {
         showScreen(formScreen);
       });
   }
-
+  function handleStaffLoginButton() {
+    const screen = document.getElementById("staffLoginScreen");
+    if (screen) {
+      screen.classList.remove("hidden");
+      showScreen(screen);
+    }
+  }
+  function handleStaffLogout() {
+    localStorage.removeItem("staffLoggedIn");
+    window.isStaffLoggedIn = false;
+    const logoutBtn = document.getElementById("staffLogoutBtn");
+    if (logoutBtn) logoutBtn.classList.add("hidden");
+    showToast("Đã đăng xuất nhân viên");
+    showScreen(document.getElementById("welcomeScreen"));
+  }
   function showGuestForm() {
     const formScreen = document.getElementById("guestFormScreen");
 
@@ -748,7 +790,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const roomText = document.getElementById("roomNoText");
         if (roomNumber && roomText) roomText.textContent = roomNumber;
 
-        showScreen(document.getElementById("welcomeScreen"));
+        if (isStaffLoggedIn) {
+          showScreen(document.getElementById("serviceScreen"));
+        } else {
+          showScreen(document.getElementById("welcomeScreen"));
+        }
       } else {
         showToast("Không lấy được thông tin khách sạn", "error");
       }
@@ -1155,4 +1201,6 @@ document.addEventListener("DOMContentLoaded", function () {
   window.cart = cart;
   window.currentService = currentService;
   window.showContactScreen = showContactScreen;
+  window.handleStaffLoginButton = handleStaffLoginButton;
+  window.handleStaffLogout = handleStaffLogout;
 });
