@@ -1058,6 +1058,24 @@ document.addEventListener("DOMContentLoaded", function () {
       showToast("Không thể kết nối máy chủ", "error");
     });
   loadWelcomeScreen();
+  const roomNumberInit = extractRoomNumber();
+  if (roomNumberInit) {
+    fetchAPI("GetGuestInfo", "POST", { RoomNo: roomNumberInit })
+      .then((res) => {
+        const guest = res?.data?.[0];
+        if (guest?.GuestName && guest?.Phone) {
+          window.guestData = guest;
+          showToast("Chào mừng trở lại! Đang chuyển tới dịch vụ...");
+          showScreen(document.getElementById("serviceScreen"));
+        } else {
+          // Nếu không có thông tin khách thì tiếp tục logic welcome bình thường
+          window.guestData = guest || null;
+        }
+      })
+      .catch(() => {
+        showToast("Không thể lấy thông tin khách", "error");
+      });
+  }
   // Gắn sự kiện nút "Xem dịch vụ"
   document.getElementById("goToServicesBtn")?.addEventListener("click", () => {
     showScreen(document.getElementById("serviceScreen"));
