@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Đặt Hàng QR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- CSS -->
+    <link
+      href="https://cdn.syncfusion.com/ej2/25.1.35/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <!-- Mobile Menu Button -->
+    <div class="fixed top-4 left-4 z-50 md:hidden">
+      <button
+        class="p-2 rounded-md bg-white shadow-md text-gray-700 hover:bg-gray-100 focus:outline-none"
+        id="mobileMenuBtn"
+      >
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          viewbox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 6h16M4 12h16M4 18h16"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+          ></path>
+        </svg>
+      </button>
+    </div>
+    <!-- Mobile Menu Overlay -->
+    <div
+      class="fixed inset-0 z-40 bg-black bg-opacity-50 hidden md:hidden"
+      id="mobileMenuOverlay"
+    ></div>
+    <!-- Sidebar -->
+    <aside
+      class="sidebar fixed top-0 left-0 z-40 h-full bg-white shadow-lg w-64 md:translate-x-0 transform -translate-x-full"
+      id="sidebar"
+    >
+      <div class="flex flex-col h-full">
+        <!-- Sidebar Header -->
+        <div class="flex items-center justify-between p-4 border-b">
+          <div class="flex items-center">
+            <svg
+              class="h-8 w-8 text-indigo-600"
+              fill="none"
+              stroke="currentColor"
+              viewbox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+              ></path>
+            </svg>
+            <h1
+              class="ml-5 text-xl font-bold text-gray-800 sidebar-item-text"
+              onclick="showWelcomeScreen()"
+            >
+              QR Hotel
+            </h1>
+          </div>
+          <button
+            class="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none hidden md:block"
+            id="toggleSidebar"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewbox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+              ></path>
+            </svg>
+          </button>
+          <button
+            class="p-2 rounded-md text-gray-500 hover:bg-gray-100 focus:outline-none md:hidden"
+            id="closeMobileMenu"
+          >
+            <svg
+              class="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewbox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6 18L18 6M6 6l12 12"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <!-- Sidebar Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+          <ul>
+            <li>
+              <a
+                class="sidebar-item flex items-center px-4 py-3 nav-link"
+                data-screen="serviceScreen"
+                href="#"
+              >
+                <svg
+                  class="h-6 w-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewbox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+                <span class="ml-3 sidebar-item-text"> Dịch Vụ </span>
+              </a>
+            </li>
+            <li>
+              <a
+                class="sidebar-item flex items-center px-4 py-3 nav-link"
+                data-screen="cartScreen"
+                href="#"
+              >
+                <svg
+                  class="h-6 w-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewbox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  ></path>
+                </svg>
+                <span class="ml-3 sidebar-item-text"> Giỏ Hàng </span>
+                <span
+                  class="ml-auto bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                  id="sidebarCartCount"
+                >
+                  0
+                </span>
+              </a>
+            </li>
+            <li>
+              <a
+                href="#"
+                onclick="showContactScreen()"
+                class="sidebar-item flex items-center px-4 py-3"
+              >
+                <svg
+                  class="h-6 w-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                  />
+                </svg>
+                <span class="ml-3 sidebar-item-text">Liên hệ</span>
+              </a>
+            </li>
+            <li class="border-t border-gray-200 my-2"></li>
+            <div id="sidebarDynamicServices"></div>
+          </ul>
+        </nav>
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t">
+          <div class="flex items-center">
+            <div
+              class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600"
+            >
+              <svg
+                class="h-5 w-5"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                  fill-rule="evenodd"
+                ></path>
+              </svg>
+            </div>
+            <div class="ml-3 sidebar-item-text" onclick="showGuestInfo()">
+              <p class="text-sm font-medium text-gray-700">Khách Hàng</p>
+              <p class="text-xs text-gray-500">Đang trực tuyến</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <!-- Main Content Container -->
+    <div
+      class="flex flex-col flex-1 transition-all duration-300 md:ml-64"
+      id="mainContent"
+    >
+      <!-- Header -->
+      <header class="bg-white shadow-sm sticky top-0 z-30">
+        <div
+          class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center"
+        >
+          <div class="flex items-center">
+            <h1 class="text-xl font-bold text-gray-800 ml-14" id="hotelTitle">
+              Nhà Hàng - Danh Mục
+              <span id="roomInfo" class="text-sm text-gray-500 ml-2"></span>
+            </h1>
+          </div>
+          <div class="flex items-center">
+            <button
+              class="relative p-2 text-gray-600 hover:text-indigo-600 focus:outline-none"
+              id="cartButton"
+            >
+              <svg
+                class="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewbox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                ></path>
+              </svg>
+              <span
+                class="absolute top-0 right-0 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+                id="cartCount"
+              >
+                0
+              </span>
+            </button>
+            <button
+              id="staffLogoutBtn"
+              class="btn-secondary text-sm px-4 py-2 rounded-md mr-4 hidden"
+              onclick="handleStaffLogout()"
+            >
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+      </header>
+      <!-- Staff Login Screen -->
+      <div class="px-4 py-8 hidden" id="staffLoginScreen">
+        <form
+          id="staffLoginForm"
+          class="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 space-y-4"
+        >
+          <h2 class="text-2xl font-bold text-center text-indigo-700">
+            Đăng nhập nhân viên
+          </h2>
+          <input
+            type="text"
+            name="username"
+            placeholder="Tên đăng nhập"
+            class="w-full border rounded-md p-2"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Mật khẩu"
+            class="w-full border rounded-md p-2"
+            required
+          />
+          <button type="submit" class="btn-primary py-2 px-4 rounded-md w-full">
+            Đăng nhập
+          </button>
+          <p class="text-sm text-red-500 hidden" id="staffLoginError"></p>
+        </form>
+      </div>
+      <!-- Welcome Screen -->
+      <div class="hidden" id="welcomeScreen">
+        <div
+          class="relative min-h-screen flex items-center justify-center overflow-hidden"
+        >
+          <div
+            class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style="
+              background-image: linear-gradient(
+                  rgba(0, 0, 0, 0.5),
+                  rgba(0, 0, 0, 0.7)
+                ),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2070&q=80');
+            "
+          ></div>
+
+          <div
+            class="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto"
+          >
+            <div class="bg-black bg-opacity-30 backdrop-blur-sm p-8 rounded-xl">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/2534/2534000.png"
+                alt="Logo khách sạn"
+                class="w-24 h-24 mx-auto mb-6"
+              />
+
+              <div
+                class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold mb-4 bg-white/20 text-white border-white/30 backdrop-blur-sm"
+              >
+                ⭐ Khách sạn 5 sao
+              </div>
+
+              <h1
+                class="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-2 leading-tight"
+              >
+                Chào mừng đến với
+                <span class="block text-yellow-400 mt-2" id="hotelName"
+                  >Royal Paradise Hotel</span
+                >
+              </h1>
+
+              <!-- Thông tin khách sạn -->
+              <p id="hotelPhone" class="text-gray-300 text-base mb-1">
+                Hotline: ...
+              </p>
+              <p id="hotelAddress" class="text-gray-300 text-sm mb-1">
+                Địa chỉ: ...
+              </p>
+              <p id="hotelEmail" class="text-gray-300 text-sm mb-4">
+                Email: ...
+              </p>
+
+              <p class="text-lg text-gray-200 mb-6" id="roomInfoWelcome">
+                (Phòng <span id="roomNoText">...</span>)
+              </p>
+
+              <div
+                class="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              >
+                <button
+                  class="btn-primary px-8 py-3 text-lg rounded-md"
+                  id="goToServicesBtn"
+                >
+                  Xem dịch vụ
+                </button>
+                <button
+                  class="btn-secondary px-8 py-3 text-lg rounded-md"
+                  onclick="handleGuestInfoButton()"
+                >
+                  Thông tin khách
+                </button>
+                <button
+                  class="btn-secondary px-8 py-3 text-lg rounded-md"
+                  onclick="handleStaffLoginButton()"
+                >
+                  Nhân viên đăng nhập
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Guest Information Form -->
+      <div class="px-4 py-8 mx-auto hidden" id="guestFormScreen">
+        <form
+          id="guestInfoForm"
+          class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-4"
+        >
+          <h2 class="text-2xl font-bold text-center">Thông tin khách hàng</h2>
+          <input
+            type="text"
+            name="GuestName"
+            placeholder="Tên khách hàng *"
+            class="w-full border rounded-md p-2"
+            required
+          />
+          <input
+            type="tel"
+            name="Phone"
+            placeholder="Số điện thoại *"
+            pattern="0\d{9}"
+            maxlength="10"
+            class="w-full border rounded-md p-2"
+            required
+          />
+          <input
+            type="email"
+            name="Email"
+            placeholder="Email"
+            class="w-full border rounded-md p-2"
+          />
+          <input
+            type="text"
+            name="Address"
+            placeholder="Địa chỉ"
+            class="w-full border rounded-md p-2"
+          />
+          <input
+            type="text"
+            name="IdentifyNo"
+            placeholder="CMND/Hộ chiếu"
+            class="w-full border rounded-md p-2"
+          />
+          <textarea
+            name="Note"
+            placeholder="Ghi chú thêm"
+            class="w-full border rounded-md p-2"
+          ></textarea>
+          <button
+            type="submit"
+            class="btn-primary py-2 px-4 rounded-md w-full"
+            id="submitGuestForm"
+          >
+            Gửi
+          </button>
+          <p class="text-sm text-red-500 hidden" id="guestFormError"></p>
+        </form>
+      </div>
+      <!-- Main Content -->
+      <div id="guestInfoScreen" class="hidden"></div>
+      <main class="flex-1 max-w-10xl px-2 sm:px-4 md:px-6 lg:px-8 py-8">
+        <!-- Service Screen -->
+        <div class="hidden" id="serviceScreen">
+          <div class="flex items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Dịch Vụ</h2>
+          </div>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            id="servicesList"
+          ></div>
+          <div
+            id="servicesPagination"
+            class="mt-4 flex justify-center space-x-2"
+          ></div>
+        </div>
+        <!-- Category Screen -->
+        <div class="hidden" id="categoryScreen">
+          <div class="flex items-center mb-6">
+            <button
+              class="mr-2 p-2 rounded-full hover:bg-gray-100"
+              id="backToServices"
+            >
+              <svg
+                class="h-5 w-5 text-gray-600"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                  fill-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <h2 class="text-2xl font-bold text-gray-800" id="categoryTitle">
+              Nhà Hàng - Danh Mục
+            </h2>
+          </div>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            id="categoriesList"
+          ></div>
+          <div
+            id="categoriesPagination"
+            class="mt-4 flex justify-center space-x-2"
+          ></div>
+        </div>
+        <!-- Menu Items Screen -->
+        <div class="hidden" id="menuItemsScreen">
+          <div class="flex items-center mb-6">
+            <button
+              class="mr-2 p-2 rounded-full hover:bg-gray-100"
+              id="backButton"
+            >
+              <svg
+                class="h-5 w-5 text-gray-600"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                  fill-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <h2 class="text-2xl font-bold text-gray-800" id="menuTitle">
+              Nhà Hàng - Món Phụ
+            </h2>
+          </div>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            id="menuItemsList"
+          ></div>
+          <div
+            id="menuItemsPagination"
+            class="mt-4 flex justify-center space-x-2"
+          ></div>
+        </div>
+        <!-- Shopping Cart Screen -->
+        <div class="hidden w-full mx-auto" id="cartScreen">
+          <div class="flex items-center mb-6">
+            <button
+              class="mr-2 p-2 rounded-full hover:bg-gray-100"
+              id="backToShopping"
+            >
+              <svg
+                class="h-5 w-5 text-gray-600"
+                fill="currentColor"
+                viewbox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  clip-rule="evenodd"
+                  d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                  fill-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <h2 class="text-2xl font-bold text-gray-800">Giỏ Hàng</h2>
+          </div>
+          <div class="text-center py-16" id="emptyCart">
+            <svg
+              class="h-16 w-16 mx-auto text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewbox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1"
+              ></path>
+            </svg>
+            <p class="mt-4 text-gray-600">Giỏ hàng của bạn đang trống</p>
+            <button
+              class="mt-6 btn-primary py-2 px-6 rounded-md"
+              id="continueShopping"
+            >
+              Tiếp tục mua sắm
+            </button>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow-md overflow-hidden hidden sm:max-w-sm lg:max-w-7xl table-cart-content"
+            id="cartContent"
+          >
+            <div class="overflow-x-auto w-full">
+              <table class="w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      scope="col"
+                    >
+                      Sản phẩm &amp; Chi tiết
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      scope="col"
+                    >
+                      Giá
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      scope="col"
+                    >
+                      Số lượng
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      scope="col"
+                    >
+                      Tổng
+                    </th>
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      scope="col"
+                    >
+                      Thao tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200" id="cartItems">
+                  <!-- Cart items will be dynamically added here -->
+                </tbody>
+              </table>
+            </div>
+            <div class="p-6 border-t border-gray-200">
+              <div
+                class="flex flex-col md:flex-row justify-between items-start sm:items-center mb-4"
+              >
+                <!-- <div class="flex items-center mb-4 sm:mb-0 w-full">
+                    <input
+                      class="border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                      id="promoCode"
+                      placeholder="Mã giảm giá"
+                      type="text"
+                    />
+                    <button
+                      class="bg-gray-200 text-gray-700 px-4 py-2 rounded-r-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                      id="applyPromo"
+                    >
+                      Áp dụng
+                    </button>
+                  </div> -->
+                <div class="w-full">
+                  <!-- <div class="flex justify-between mb-2">
+                    <span class="text-gray-600 mr-8"> Tạm tính: </span>
+                    <span class="font-medium" id="subtotal"> 0₫ </span>
+                  </div>
+                  <div class="flex justify-between mb-2">
+                    <span class="text-gray-600 mr-8"> Giảm giá: </span>
+                    <span class="font-medium" id="discount"> 0₫ </span>
+                  </div> -->
+                  <div class="flex justify-between text-lg font-bold">
+                    <span class="text-gray-800 mr-8"> Tổng cộng: </span>
+                    <span class="text-indigo-600" id="total"> 0₫ </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="flex flex-col md:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 mt-6"
+              >
+                <button
+                  class="btn-secondary py-2 px-6 rounded-md"
+                  id="backToShoppingBtn"
+                >
+                  Tiếp tục
+                </button>
+                <button class="btn-primary py-2 px-6 rounded-md" id="checkout">
+                  Gửi yêu cầu
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Order Confirmation Screen -->
+        <div class="hidden fade-in text-center py-10" id="confirmationScreen">
+          <svg
+            class="h-20 w-20 mx-auto text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewbox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+            ></path>
+          </svg>
+          <h2 class="text-2xl font-bold text-gray-800 mt-6">
+            Đặt Hàng Thành Công!
+          </h2>
+          <p class="text-gray-600 mt-2">Cảm ơn bạn đã mua sắm với chúng tôi.</p>
+          <p class="text-gray-600">
+            Mã đơn hàng của bạn:
+            <span class="font-semibold text-indigo-600" id="orderNumber">
+            </span>
+          </p>
+          <button class="mt-8 btn-primary py-2 px-6 rounded-md" id="newOrder">
+            Đặt Hàng Mới
+          </button>
+        </div>
+        <div class="hidden fade-in text-center py-10" id="contactScreen">
+          <h2 class="text-3xl font-bold text-gray-800 mb-4">
+            Liên hệ khách sạn
+          </h2>
+
+          <div
+            class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow text-left"
+          >
+            <p class="mb-2">
+              <strong>Tên khách sạn:</strong>
+              <span id="contactHotelName">...</span>
+            </p>
+            <p class="mb-2">
+              <strong>Điện thoại:</strong> <span id="contactPhone">...</span>
+            </p>
+            <p class="mb-2">
+              <strong>Email:</strong> <span id="contactEmail">...</span>
+            </p>
+            <p class="mb-2">
+              <strong>Địa chỉ:</strong> <span id="contactAddress">...</span>
+            </p>
+          </div>
+
+          <div
+            class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow text-left mt-6"
+          >
+            <h3 class="text-xl font-semibold text-indigo-700 mb-4">
+              Thông tin khách hàng
+            </h3>
+            <div id="contactGuestInfo"></div>
+          </div>
+        </div>
+        <!-- ✅ Thêm vùng giao diện scheduler vào index.html -->
+        <div id="miceSchedulerScreen" class="hidden p-4 w-full">
+          <h2 class="text-2xl font-bold mb-4 text-indigo-600">
+            Lịch đặt phòng
+          </h2>
+
+          <!-- Toolbar trên header -->
+          <div
+            id="toolbar"
+            class="flex flex-wrap justify-end items-center gap-3 mb-4"
+          >
+            <label for="datePicker" class="font-medium">Chọn ngày:</label>
+            <input
+              type="date"
+              id="datePicker"
+              class="border rounded px-3 py-1"
+            />
+
+            <label for="viewMode" class="font-medium">Xem:</label>
+            <select id="viewMode" class="border rounded px-3 py-1">
+              <option value="day">Ngày</option>
+              <option value="week">Tuần</option>
+              <option value="month" selected>Tháng</option>
+            </select>
+          </div>
+
+          <!-- ✅ Syncfusion Scheduler Container -->
+          <div id="schedulerContainer" class="bg-white rounded shadow">
+            <div id="scheduler"></div>
+          </div>
+
+          <!-- Modal Đặt phòng & AlertBox đừa thành phần chung để hiển thị khi showScreen('miceSchedulerScreen') được gọi -->
+          <div
+            id="bookingModal"
+            class="hidden fixed top-10 left-1/2 transform -translate-x-1/2 w-full max-w-6xl bg-white p-6 border border-gray-300 rounded-lg shadow-lg z-50"
+          >
+            <form id="bookingForm" class="space-y-3">
+              <h3 class="text-lg font-semibold mb-2">Đặt phòng</h3>
+              <!-- Số phòng -->
+              <label class="block"
+                >Số phòng <span class="text-red-500">*</span>
+                <input
+                  name="room"
+                  readonly
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Loại phòng -->
+              <label class="block"
+                >Loại phòng <span class="text-red-500">*</span>
+                <select
+                  name="type"
+                  required
+                  id="roomTypeSelect"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                >
+                  <option value="">-- Chọn loại phòng --</option>
+                  <!-- Các option sẽ được thêm bằng JS -->
+                </select>
+              </label>
+
+              <!-- Từ ngày -->
+              <label class="block"
+                >Từ ngày <span class="text-red-500">*</span>
+                <input
+                  name="start"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Đến ngày -->
+              <label class="block"
+                >Đến ngày <span class="text-red-500">*</span>
+                <input
+                  name="end"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Số lượng khách -->
+              <label class="block"
+                >Số lượng khách <span class="text-red-500">*</span>
+                <input
+                  name="guests"
+                  type="number"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Họ tên -->
+              <label class="block"
+                >Họ & tên <span class="text-red-500">*</span>
+                <input
+                  name="name"
+                  required
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- SĐT -->
+              <label class="block"
+                >Số điện thoại <span class="text-red-500">*</span>
+                <input
+                  name="phone"
+                  required
+                  maxlength="10"
+                  pattern="^0\d{9}$"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+
+              <!-- Email -->
+              <label class="block"
+                >Email
+                <input
+                  name="email"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                />
+              </label>
+              <label class="block"
+                >Ghi chú
+                <textarea
+                  name="note"
+                  class="mt-1 border rounded px-3 py-1 w-full"
+                ></textarea>
+              </label>
+              <div class="flex justify-end gap-3">
+                <button
+                  type="submit"
+                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Lưu
+                </button>
+                <button
+                  type="button"
+                  onclick="closeModal()"
+                  class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                >
+                  Hủy
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div
+            id="alertBox"
+            class="hidden fixed top-4 right-4 px-4 py-2 rounded shadow text-white text-sm z-[9999]"
+          ></div>
+        </div>
+      </main>
+    </div>
+    <iframe
+      height="1"
+      style="
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        border: none;
+        visibility: hidden;
+      "
+      width="1"
+    >
+    </iframe>
+  </body>
+
+  <script src="scheduler-logic.js"></script>
+
+  <!-- JS -->
+  <script src="https://cdn.syncfusion.com/ej2/25.1.35/dist/ej2.min.js"></script>
+</html>
