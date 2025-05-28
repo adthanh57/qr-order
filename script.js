@@ -331,6 +331,14 @@ document.addEventListener("DOMContentLoaded", function () {
         serviceCard.addEventListener("click", function () {
           currentService = service;
           window.currentService = service;
+          if (service.Name === "MICE") {
+            showScreen(document.getElementById("miceSchedulerScreen"));
+            if (!window.schedulerInitialized) {
+              initScheduler();
+              window.schedulerInitialized = true;
+            }
+            return;
+          }
           renderCategories(service.ID, service.Name);
           categoryTitle.textContent = service.Name + " - Danh Mục";
           showScreen(categoryScreen);
