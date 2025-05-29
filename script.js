@@ -64,6 +64,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const guestFormScreen = document.getElementById("guestFormScreen");
   const navLinks = document.querySelectorAll(".nav-link");
   const guestForm = document.getElementById("guestInfoForm");
+  const staffLoginForm = document.getElementById("staffLoginForm");
+  const goToServicesBtn = document.getElementById("goToServicesBtn");
+  const hotelTitle = document.getElementById("hotelTitle");
+  const hotelName = document.getElementById("hotelName");
+  const contactHotelName = document.getElementById("contactHotelName");
+  const contactPhone = document.getElementById("contactPhone");
+  const contactEmail = document.getElementById("contactEmail");
+  const contactAddress = document.getElementById("contactAddress");
+  const contactScreen = document.getElementById("contactScreen");
+  const hotelPhone = document.getElementById("hotelPhone");
+  const hotelAddress = document.getElementById("hotelAddress");
+  const hotelEmail = document.getElementById("hotelEmail");
   // Sidebar Toggle
   toggleSidebarBtn.addEventListener("click", function () {
     isSidebarCollapsed = !isSidebarCollapsed;
@@ -131,28 +143,26 @@ document.addEventListener("DOMContentLoaded", function () {
       mobileMenuOverlay.classList.add("hidden");
     });
   });
-  document
-    .getElementById("staffLoginForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
-      const form = e.target;
-      const username = form.username.value.trim();
-      const password = form.password.value.trim();
+  staffLoginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const username = form.username.value.trim();
+    const password = form.password.value.trim();
 
-      // Dummy check — thay bằng gọi API thật nếu có
-      if (username === "admin" && password === "123456") {
-        localStorage.setItem("staffLoggedIn", "1");
-        isStaffLoggedIn = true;
-        const logoutBtn = document.getElementById("staffLogoutBtn");
-        if (logoutBtn) logoutBtn.classList.remove("hidden");
-        showToast("Đăng nhập thành công!");
-        showScreen(document.getElementById("serviceScreen"));
-      } else {
-        document.getElementById("staffLoginError").textContent =
-          "Sai thông tin đăng nhập";
-        document.getElementById("staffLoginError").classList.remove("hidden");
-      }
-    });
+    // Dummy check — thay bằng gọi API thật nếu có
+    if (username === "admin" && password === "123456") {
+      localStorage.setItem("staffLoggedIn", "1");
+      isStaffLoggedIn = true;
+      const logoutBtn = document.getElementById("staffLogoutBtn");
+      if (logoutBtn) logoutBtn.classList.remove("hidden");
+      showToast("Đăng nhập thành công!");
+      showScreen(serviceScreen);
+    } else {
+      document.getElementById("staffLoginError").textContent =
+        "Sai thông tin đăng nhập";
+      document.getElementById("staffLoginError").classList.remove("hidden");
+    }
+  });
   function navigateToService(service) {
     currentService = service;
     window.currentService = service;
@@ -734,7 +744,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
           if (hasEnoughData) {
             showToast("Đã tự động nhận thông tin khách hàng");
-            showScreen(document.getElementById("serviceScreen"));
+            showScreen(serviceScreen);
           } else {
             // Điền form nếu thiếu dữ liệu
             showScreen(formScreen);
@@ -782,35 +792,25 @@ document.addEventListener("DOMContentLoaded", function () {
       if (res.data) {
         const hotel = res.data;
         window.hotelInfo = hotel;
-        document.getElementById("hotelName").textContent =
-          hotel.Name || "Khách sạn";
+        hotelName.textContent = hotel.Name || "Khách sạn";
         if (hotel.WelcomeFontColor) {
-          document.getElementById("hotelName").style.color =
-            hotel.WelcomeFontColor;
+          hotelName.style.color = hotel.WelcomeFontColor;
         }
-        document.getElementById("hotelTitle").textContent =
-          hotel.Name || "Khách sạn";
+        hotelTitle.textContent = hotel.Name || "Khách sạn";
         if (hotel.WelcomeFontColor) {
-          document.getElementById("hotelTitle").style.color =
-            hotel.WelcomeFontColor;
+          hotelTitle.style.color = hotel.WelcomeFontColor;
         }
 
         // Không dùng ảnh từ API => logo giữ nguyên
-        document.getElementById("hotelPhone").textContent = `Hotline: ${
-          hotel.Phone || "..."
-        }`;
-        document.getElementById("hotelAddress").textContent = `Địa chỉ: ${
-          hotel.Address || "..."
-        }`;
-        document.getElementById("hotelEmail").textContent = `Email: ${
-          hotel.Email || "..."
-        }`;
+        hotelPhone.textContent = `Hotline: ${hotel.Phone || "..."}`;
+        hotelAddress.textContent = `Địa chỉ: ${hotel.Address || "..."}`;
+        hotelEmail.textContent = `Email: ${hotel.Email || "..."}`;
 
         const roomText = document.getElementById("roomNoText");
         if (roomNumber && roomText) roomText.textContent = roomNumber;
 
         if (isStaffLoggedIn) {
-          showScreen(document.getElementById("serviceScreen"));
+          showScreen(serviceScreen);
         } else {
           showScreen(document.getElementById("welcomeScreen"));
         }
@@ -858,14 +858,12 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    document.getElementById("contactHotelName").textContent =
-      hotel.Name || "...";
-    document.getElementById("contactPhone").textContent = hotel.Phone || "...";
-    document.getElementById("contactEmail").textContent = hotel.Email || "...";
-    document.getElementById("contactAddress").textContent =
-      hotel.Address || "...";
+    contactHotelName.textContent = hotel.Name || "...";
+    contactPhone.textContent = hotel.Phone || "...";
+    contactEmail.textContent = hotel.Email || "...";
+    contactAddress.textContent = hotel.Address || "...";
     updateContactScreen();
-    showScreen(document.getElementById("contactScreen"));
+    showScreen(contactScreen);
   }
 
   function submitGuestOrder(cart, currentService) {
@@ -1133,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (guest?.GuestName && guest?.Phone) {
           window.guestData = guest;
           showToast("Chào mừng trở lại! Đang chuyển tới dịch vụ...");
-          showScreen(document.getElementById("serviceScreen"));
+          showScreen(serviceScreen);
         } else {
           // Nếu không có thông tin khách thì tiếp tục logic welcome bình thường
           window.guestData = guest || null;
@@ -1144,12 +1142,12 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
   // Gắn sự kiện nút "Xem dịch vụ"
-  document.getElementById("goToServicesBtn")?.addEventListener("click", () => {
-    showScreen(document.getElementById("serviceScreen"));
+  goToServicesBtn?.addEventListener("click", () => {
+    showScreen(serviceScreen);
   });
   // Gắn sự kiện nút "Xem dịch vụ"
-  document.getElementById("hotelTitle")?.addEventListener("click", () => {
-    showScreen(document.getElementById("serviceScreen"));
+  hotelTitle?.addEventListener("click", () => {
+    showScreen(serviceScreen);
   });
   // Xử lý form thông tin khách
   cartButton.addEventListener("click", function () {
@@ -1189,7 +1187,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Tiếp tục đến màn dịch vụ, không gửi đơn hàng ngay
       showToast("Thông tin khách hàng đã lưu. Mời chọn dịch vụ.");
-      showScreen(document.getElementById("serviceScreen"));
+      showScreen(serviceScreen);
       btn.disabled = false;
       btn.textContent = "Gửi";
     });
