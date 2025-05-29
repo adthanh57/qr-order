@@ -264,7 +264,7 @@
             </button>
             <button
               id="staffLogoutBtn"
-              class="btn-secondary text-sm px-4 py-2 rounded-md mr-4 hidden"
+              class="ml-3 text-gray-700 border border-gray-300 hover:border-gray-400 hover:bg-gray-100 px-3 py-1.5 text-sm rounded-md transition"
               onclick="handleStaffLogout()"
             >
               Đăng xuất
@@ -755,7 +755,8 @@
           <!-- Modal Đặt phòng & AlertBox đừa thành phần chung để hiển thị khi showScreen('miceSchedulerScreen') được gọi -->
           <div
             id="bookingModal"
-            class="hidden fixed top-10 left-1/2 transform -translate-x-1/2 w-full max-w-6xl bg-white p-6 border border-gray-300 rounded-lg shadow-lg z-50"
+            class="fixed top-10 left-1/2 transform -translate-x-1/2 w-full max-w-6xl bg-white p-6 border border-gray-300 rounded-lg shadow-lg z-50 overflow-y-auto"
+            style="max-height: 90vh"
           >
             <form id="bookingForm" class="space-y-3">
               <h3 class="text-lg font-semibold mb-2">Đặt phòng</h3>

@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document
       .querySelectorAll(
-        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen, #contactScreen, #staffLoginScreen,#miceSchedulerScreen"
+        "#welcomeScreen, #guestFormScreen, #guestInfoScreen, #serviceScreen, #categoryScreen, #menuItemsScreen, #cartScreen, #confirmationScreen, #contactScreen, #staffLoginScreen,#miceSchedulerScreen, #bookingModal"
       )
       .forEach((el) => el.classList.add("hidden"));
 
