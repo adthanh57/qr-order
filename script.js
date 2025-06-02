@@ -1211,6 +1211,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   function initScheduler() {
+    let previousStart = null;
+    let previousEnd = null;
     const rooms = [
       { name: "Phòng 101", id: "R1", type: "Standard" },
       { name: "Phòng 102", id: "R2", type: "Deluxe" },
@@ -1283,7 +1285,7 @@ document.addEventListener("DOMContentLoaded", function () {
         items: [
           {
             text: "Xoá đặt phòng",
-            onClick: function (args) {
+            onClick: (args) => {
               if (confirm("Bạn có chắc chắn muốn xoá lịch đặt phòng này?")) {
                 dp.events.remove(args.source);
                 showAlert("Đã xóa sự kiện thành công", "bg-red-500");
@@ -1293,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", function () {
           },
         ],
       }),
-      onTimeRangeSelected: function (args) {
+      onTimeRangeSelected: (args) => {
         // Tạo object mô phỏng event mới
         const newEvent = {
           id: "", // id rỗng vì là mới
@@ -1315,9 +1317,7 @@ document.addEventListener("DOMContentLoaded", function () {
         openModal(args);
         dp.clearSelection();
       },
-      onEventResized: function (args) {
-        const originalStart = new DayPilot.Date(args.e.data.start); // clone giá trị
-        const originalEnd = new DayPilot.Date(args.e.data.end); // clone giá trị
+      onEventResized: (args) => {
         const resizedEvent = {
           ...args.e.data,
           start: args.newStart,
@@ -1329,20 +1329,28 @@ document.addEventListener("DOMContentLoaded", function () {
             "⚠️ Thời gian mới bị trùng với một lịch khác!",
             "bg-red-600"
           );
+          // Rollback
+          args.e.data.start = args.e.data.originalStart;
+          args.e.data.end = args.e.data.originalEnd;
+          args.e.data.resource = args.e.data.originalResource;
           // Rollback về vị trí cũ
           args.preventDefault(); // Ngăn DayPilot cập nhật event
+          dp.events.update(args.e); // Cập nhật lại event
+          dp.update();
           return;
         }
 
         args.e.data.start = args.newStart;
         args.e.data.end = args.newEnd;
+        args.e.data.originalStart = args.newStart;
+        args.e.data.originalEnd = args.newEnd;
+        args.e.data.originalResource = args.newResource;
         dp.events.update(args.e);
         dp.update();
         showAlert("✏️ Đã thay đổi thời gian sự kiện", "bg-indigo-500");
+        console.log(dp.events.list);
       },
-      onEventMoved: function (args) {
-        const originalStart = args.e.data.start; // giữ nguyên gốc, đã đúng định dạng
-        const originalEnd = args.e.data.end;
+      onEventMoved: (args) => {
         const movedEvent = {
           ...args.e.data,
           start: args.newStart,
@@ -1354,23 +1362,28 @@ document.addEventListener("DOMContentLoaded", function () {
             "⚠️ Thời gian mới bị trùng với một lịch khác!",
             "bg-red-600"
           );
-
+          // Rollback
+          args.e.data.start = args.e.data.originalStart;
+          args.e.data.end = args.e.data.originalEnd;
+          args.e.data.resource = args.e.data.originalResource;
           // Rollback về vị trí cũ
-          args.e.data.start = originalStart;
-          args.e.data.end = originalEnd;
-          dp.events.update(args.e);
+          args.preventDefault(); // Ngăn DayPilot cập nhật event
+          dp.events.update(args.e); // Cập nhật lại event
           dp.update();
           return;
         }
-
+        args.e.data.originalStart = args.newStart;
+        args.e.data.originalEnd = args.newEnd;
+        args.e.data.originalResource = args.newResource;
         // Nếu không trùng thì cập nhật như bình thường
         args.e.data.start = args.newStart;
         args.e.data.end = args.newEnd;
         dp.events.update(args.e);
         dp.update();
         showAlert("🔄 Cập nhật thời gian sự kiện thành công", "bg-blue-500");
+        console.log(dp.events.list);
       },
-      onEventClick: function (args) {
+      onEventClick: (args) => {
         const e = args.e.data;
         const form = document.getElementById("bookingForm");
         form.room.value = e.resource;
@@ -1389,7 +1402,7 @@ document.addEventListener("DOMContentLoaded", function () {
         form.dataset.eventId = e.id;
         document.getElementById("bookingModal").classList.remove("hidden");
       },
-      onBeforeEventRender: function (args) {
+      onBeforeEventRender: (args) => {
         args.data.backColor = args.data.type === "VIP" ? "#ffc107" : "#3399ff";
         args.data.fontColor = "white";
         args.data.toolTip = `Tên: ${args.data.name}
@@ -1496,6 +1509,9 @@ Khách: ${args.data.guests}`;
           phone: form.phone.value,
           email: form.email.value,
           note: form.note.value,
+          originalStart: parseDate(form.start.value),
+          originalEnd: parseDate(form.end.value),
+          originalResource: form.room.value,
         };
         if (isOverlapping(eObj)) {
           showAlert(
@@ -1512,6 +1528,7 @@ Khách: ${args.data.guests}`;
         }
         showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
         closeModal();
+        console.log(dp.events.list);
       });
 
     document.getElementById("datePicker").valueAsDate = new Date();
