@@ -1217,9 +1217,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function initScheduler() {
     const rooms = [
-      { name: "Phòng 101", id: "R1", type: "Standard" },
-      { name: "Phòng 102", id: "R2", type: "Deluxe" },
-      { name: "Phòng 201", id: "R3", type: "VIP" },
+      { name: "Phòng 101", id: "R1", type: "Standard", backColor: "#6aa84f" },
+      { name: "Phòng 102", id: "R2", type: "Deluxe", backColor: "#6aa84f" },
+      { name: "Phòng 201", id: "R3", type: "VIP", backColor: "#f1c232" },
     ];
 
     const events = [];
