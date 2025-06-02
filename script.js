@@ -1274,16 +1274,16 @@ document.addEventListener("DOMContentLoaded", function () {
       scale: "Hour",
       days: 30,
       startDate: DayPilot.Date.today(),
-      businessBeginsHour: 6,
-      businessEndsHour: 20,
-      cellWidth: 40,
+      businessBeginsHour: 0,
+      businessEndsHour: 0,
+      cellWidth: 100,
       wheelStep: 24,
       scrollX: "Auto",
       scrollY: "Auto",
       wheelHorizontal: true,
       resources: rooms,
       events: events,
-      theme: "scheduler_white",
+      // theme: "scheduler_white",
       contextMenu: new DayPilot.Menu({
         items: [
           {
@@ -1406,11 +1406,10 @@ document.addEventListener("DOMContentLoaded", function () {
         bookingModal.classList.remove("hidden");
       },
       onBeforeEventRender: (args) => {
-        args.data.backColor = args.data.type === "VIP" ? "#ffc107" : "#3399ff";
-        args.data.fontColor = "white";
-        args.data.toolTip = `Tên: ${args.data.name}
-SĐT: ${args.data.phone}
-Khách: ${args.data.guests}`;
+        args.data.barColor =
+          args.data.type === "VIP" ? barColor(2) : barColor(1);
+        args.data.barBackColor =
+          args.data.type === "VIP" ? barBackColor(2) : barBackColor(1);
       },
     });
 
@@ -1425,6 +1424,14 @@ Khách: ${args.data.guests}`;
       form.end.value = args.end.toString("dd/MM/yyyy HH:mm:ss");
       form.dataset.eventId = "";
       bookingModal.classList.remove("hidden");
+    }
+    function barColor(i) {
+      const colors = ["#3c78d8", "#6aa84f", "#f1c232", "#cc0000"];
+      return colors[i % 4];
+    }
+    function barBackColor(i) {
+      const colors = ["#a4c2f4", "#b6d7a8", "#ffe599", "#ea9999"];
+      return colors[i % 4];
     }
 
     function closeModal() {
@@ -1560,14 +1567,14 @@ Khách: ${args.data.guests}`;
           { groupBy: "Day", format: "dd/MM/yyyy" },
           { groupBy: "Hour" },
         ];
-        dp.cellWidth = 40;
+        dp.cellWidth = 100;
       } else if (scale === "Day") {
         dp.scale = "Day";
         dp.timeHeaders = [
           { groupBy: "Month" },
           { groupBy: "Day", format: "dd/MM" },
         ];
-        dp.cellWidth = 100;
+        dp.cellWidth = 200;
       }
 
       dp.update(); // cập nhật lại giao diện
