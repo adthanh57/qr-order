@@ -76,6 +76,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const hotelPhone = document.getElementById("hotelPhone");
   const hotelAddress = document.getElementById("hotelAddress");
   const hotelEmail = document.getElementById("hotelEmail");
+  const scaleSelect = document.getElementById("scaleSelect");
+  const viewMode = document.getElementById("viewMode");
+  const datePicker = document.getElementById("datePicker");
+  const bookingForm = document.getElementById("bookingForm");
+  const bookingModal = document.getElementById("bookingModal");
   // Sidebar Toggle
   toggleSidebarBtn.addEventListener("click", function () {
     isSidebarCollapsed = !isSidebarCollapsed;
@@ -224,7 +229,6 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCartCount();
     showScreen(serviceScreen);
   });
-
   function showScreen(screen) {
     const protectedScreens = [
       "serviceScreen",
@@ -718,7 +722,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutBtn = document.getElementById("staffLogoutBtn");
     if (logoutBtn) logoutBtn.classList.add("hidden");
     showToast("Đã đăng xuất nhân viên");
-    showScreen(document.getElementById("welcomeScreen"));
+    showScreen(welcomeScreen);
   }
   function showGuestForm() {
     const formScreen = document.getElementById("guestFormScreen");
@@ -812,7 +816,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isStaffLoggedIn) {
           showScreen(serviceScreen);
         } else {
-          showScreen(document.getElementById("welcomeScreen"));
+          showScreen(welcomeScreen);
         }
       } else {
         showToast("Không lấy được thông tin khách sạn", "error");
@@ -1385,7 +1389,7 @@ document.addEventListener("DOMContentLoaded", function () {
       },
       onEventClick: (args) => {
         const e = args.e.data;
-        const form = document.getElementById("bookingForm");
+        const form = bookingForm;
         form.room.value = e.resource;
         form.type.value = getRoomTypeById(e.resource); // override nếu type chưa đúng
         form.start.value = new DayPilot.Date(e.start).toString(
@@ -1400,7 +1404,7 @@ document.addEventListener("DOMContentLoaded", function () {
         form.email.value = e.email || "";
         form.note.value = e.note || "";
         form.dataset.eventId = e.id;
-        document.getElementById("bookingModal").classList.remove("hidden");
+        bookingModal.classList.remove("hidden");
       },
       onBeforeEventRender: (args) => {
         args.data.backColor = args.data.type === "VIP" ? "#ffc107" : "#3399ff";
@@ -1414,18 +1418,18 @@ Khách: ${args.data.guests}`;
     dp.init();
 
     function openModal(args) {
-      const form = document.getElementById("bookingForm");
+      const form = bookingForm;
       form.reset();
       form.room.value = args.resource;
       form.type.value = getRoomTypeById(args.resource);
       form.start.value = args.start.toString("dd/MM/yyyy HH:mm:ss");
       form.end.value = args.end.toString("dd/MM/yyyy HH:mm:ss");
       form.dataset.eventId = "";
-      document.getElementById("bookingModal").classList.remove("hidden");
+      bookingModal.classList.remove("hidden");
     }
 
     function closeModal() {
-      document.getElementById("bookingModal").classList.add("hidden");
+      bookingModal.classList.add("hidden");
     }
     function isOverlapping(newEvent) {
       return dp.events.list.some((existing) => {
@@ -1443,116 +1447,131 @@ Khách: ${args.data.guests}`;
         return !(end2 <= start1 || start2 >= end1); // Có giao nhau
       });
     }
-    document
-      .getElementById("bookingForm")
-      .addEventListener("submit", function (e) {
-        e.preventDefault();
-        const form = e.target;
+    bookingForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const form = e.target;
 
-        const requiredFields = [
-          "room",
-          "type",
-          "start",
-          "end",
-          "guests",
-          "name",
-          "phone",
-        ];
+      const requiredFields = [
+        "room",
+        "type",
+        "start",
+        "end",
+        "guests",
+        "name",
+        "phone",
+      ];
 
-        for (const field of requiredFields) {
-          const value = form[field].value.trim();
-          if (!value) {
+      for (const field of requiredFields) {
+        const value = form[field].value.trim();
+        if (!value) {
+          showAlert(
+            `⚠️ Vui lòng điền đầy đủ trường: ${field}`,
+            "bg-yellow-500"
+          );
+          form[field].focus();
+          return;
+        }
+        if (field === "email") {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(value)) {
+            showAlert("⚠️ Email không đúng định dạng", "bg-yellow-500");
+            form[field].focus();
+            return;
+          }
+        }
+        if (field === "phone") {
+          const phoneRegex = /^0\d{9}$/;
+          if (!phoneRegex.test(value)) {
             showAlert(
-              `⚠️ Vui lòng điền đầy đủ trường: ${field}`,
+              "⚠️ Số điện thoại phải có 10 chữ số và bắt đầu bằng 0",
               "bg-yellow-500"
             );
             form[field].focus();
             return;
           }
-          if (field === "email") {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(value)) {
-              showAlert("⚠️ Email không đúng định dạng", "bg-yellow-500");
-              form[field].focus();
-              return;
-            }
-          }
-          if (field === "phone") {
-            const phoneRegex = /^0\d{9}$/;
-            if (!phoneRegex.test(value)) {
-              showAlert(
-                "⚠️ Số điện thoại phải có 10 chữ số và bắt đầu bằng 0",
-                "bg-yellow-500"
-              );
-              form[field].focus();
-              return;
-            }
-          }
         }
+      }
 
-        const parseDate = (str) => {
-          const [date, time] = str.split(" ");
-          const [day, month, year] = date.split("/");
-          return `${year}-${month}-${day}T${time}`;
-        };
+      const parseDate = (str) => {
+        const [date, time] = str.split(" ");
+        const [day, month, year] = date.split("/");
+        return `${year}-${month}-${day}T${time}`;
+      };
 
-        const eventId = form.dataset.eventId;
-        const eObj = {
-          id: eventId || DayPilot.guid(),
-          start: parseDate(form.start.value),
-          end: parseDate(form.end.value),
-          resource: form.room.value,
-          text: `${form.name.value} (${form.guests.value} khách)`,
-          type: form.type.value,
-          guests: form.guests.value,
-          name: form.name.value,
-          phone: form.phone.value,
-          email: form.email.value,
-          note: form.note.value,
-          originalStart: parseDate(form.start.value),
-          originalEnd: parseDate(form.end.value),
-          originalResource: form.room.value,
-        };
-        if (isOverlapping(eObj)) {
-          showAlert(
-            "⚠️ Phòng này đã được đặt trong khoảng thời gian đó!",
-            "bg-red-600"
-          );
-          return;
-        }
+      const eventId = form.dataset.eventId;
+      const eObj = {
+        id: eventId || DayPilot.guid(),
+        start: parseDate(form.start.value),
+        end: parseDate(form.end.value),
+        resource: form.room.value,
+        text: `${form.name.value} (${form.guests.value} khách)`,
+        type: form.type.value,
+        guests: form.guests.value,
+        name: form.name.value,
+        phone: form.phone.value,
+        email: form.email.value,
+        note: form.note.value,
+        originalStart: parseDate(form.start.value),
+        originalEnd: parseDate(form.end.value),
+        originalResource: form.room.value,
+      };
+      if (isOverlapping(eObj)) {
+        showAlert(
+          "⚠️ Phòng này đã được đặt trong khoảng thời gian đó!",
+          "bg-red-600"
+        );
+        return;
+      }
 
-        if (eventId) {
-          dp.events.update(eObj);
-        } else {
-          dp.events.add(eObj);
-        }
-        showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
-        closeModal();
-        console.log(dp.events.list);
-      });
+      if (eventId) {
+        dp.events.update(eObj);
+      } else {
+        dp.events.add(eObj);
+      }
+      showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
+      closeModal();
+      console.log(dp.events.list);
+    });
 
-    document.getElementById("datePicker").valueAsDate = new Date();
-    document
-      .getElementById("datePicker")
-      .addEventListener("change", function (e) {
-        dp.startDate = e.target.value;
-        dp.update();
-      });
+    datePicker.valueAsDate = new Date();
+    datePicker.addEventListener("change", function (e) {
+      dp.startDate = e.target.value;
+      dp.update();
+    });
 
     // Thay đổi chế độ xem (ngày/tuần/tháng)
-    document
-      .getElementById("viewMode")
-      .addEventListener("change", function (e) {
-        const mode = e.target.value;
-        if (mode === "day") {
-          dp.days = 1;
-        } else if (mode === "week") {
-          dp.days = 7;
-        } else {
-          dp.days = 30;
-        }
-        dp.update();
-      });
+    viewMode.addEventListener("change", function (e) {
+      const mode = e.target.value;
+      if (mode === "day") {
+        dp.days = 1;
+      } else if (mode === "week") {
+        dp.days = 7;
+      } else {
+        dp.days = 30;
+      }
+      dp.update();
+    });
+    scaleSelect.addEventListener("change", function (e) {
+      const scale = e.target.value;
+
+      if (scale === "Hour") {
+        dp.scale = "Hour";
+        dp.timeHeaders = [
+          { groupBy: "Day", format: "dd/MM/yyyy" },
+          { groupBy: "Hour" },
+        ];
+        dp.cellWidth = 40;
+      } else if (scale === "Day") {
+        dp.scale = "Day";
+        dp.timeHeaders = [
+          { groupBy: "Month" },
+          { groupBy: "Day", format: "dd/MM" },
+        ];
+        dp.cellWidth = 100;
+      }
+
+      dp.update(); // cập nhật lại giao diện
+    });
     function getRoomTypeById(roomId) {
       const room = rooms.find((r) => r.id === roomId);
       return room ? room.type : "";

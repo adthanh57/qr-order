@@ -734,6 +734,10 @@
             id="toolbar"
             class="flex flex-wrap justify-end items-center gap-3 mb-4"
           >
+            <select id="scaleSelect" class="border px-2 py-1 rounded">
+              <option value="Hour">Giờ</option>
+              <option value="Day">Ngày</option>
+            </select>
             <label for="datePicker" class="font-medium">Chọn ngày:</label>
             <input
               type="date"
@@ -776,7 +780,7 @@
                 >Loại phòng <span class="text-red-500">*</span>
                 <select
                   name="type"
-                  disabled 
+                  disabled
                   id="roomTypeSelect"
                   class="mt-1 border rounded px-3 py-1 w-full"
                 >
