@@ -1215,10 +1215,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
   function initScheduler() {
-    let previousStart = null;
-    let previousEnd = null;
     const rooms = [
-      { name: "Phòng 101", id: "R1", type: "Standard" },
+      { name: "Phòng 101", id: "R1", type: "Standard",co },
       { name: "Phòng 102", id: "R2", type: "Deluxe" },
       { name: "Phòng 201", id: "R3", type: "VIP" },
     ];
