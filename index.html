@@ -857,20 +857,31 @@
                   class="mt-1 border rounded px-3 py-1 w-full"
                 ></textarea>
               </label>
-              <div class="flex justify-end gap-3">
-                <button
-                  type="submit"
-                  class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                >
-                  Lưu
-                </button>
-                <button
-                  type="button"
-                  onclick="closeModal()"
-                  class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                >
-                  Hủy
-                </button>
+              <div class="flex justify-between gap-3">
+                <div>
+                  <button
+                    type="button"
+                    id="deleteEventBtn"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                  >
+                    Xoá
+                  </button>
+                </div>
+                <div>
+                  <button
+                    type="submit"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    Lưu
+                  </button>
+                  <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                  >
+                    Hủy
+                  </button>
+                </div>
               </div>
             </form>
           </div>

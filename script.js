@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const datePicker = document.getElementById("datePicker");
   const bookingForm = document.getElementById("bookingForm");
   const bookingModal = document.getElementById("bookingModal");
+  const deleteEventBtn = document.getElementById("deleteEventBtn");
   // Sidebar Toggle
   toggleSidebarBtn.addEventListener("click", function () {
     isSidebarCollapsed = !isSidebarCollapsed;
@@ -1216,7 +1217,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function initScheduler() {
     const rooms = [
-      { name: "Phòng 101", id: "R1", type: "Standard",co },
+      { name: "Phòng 101", id: "R1", type: "Standard" },
       { name: "Phòng 102", id: "R2", type: "Deluxe" },
       { name: "Phòng 201", id: "R3", type: "VIP" },
     ];
@@ -1549,6 +1550,7 @@ Khách: ${args.data.guests}`;
       }
       dp.update();
     });
+    // Thay đổi chế độ chọn (giờ/ngày)
     scaleSelect.addEventListener("change", function (e) {
       const scale = e.target.value;
 
@@ -1569,6 +1571,27 @@ Khách: ${args.data.guests}`;
       }
 
       dp.update(); // cập nhật lại giao diện
+    });
+    deleteEventBtn.addEventListener("click", function () {
+      const form = bookingForm;
+      const eventId = form.dataset.eventId;
+
+      if (!eventId) {
+        showAlert("⚠️ Không tìm thấy lịch để xoá!", "bg-red-500");
+        return;
+      }
+
+      if (!confirm("Bạn có chắc chắn muốn xoá lịch này?")) return;
+
+      const evIndex = dp.events.list.findIndex((e) => e.id == eventId);
+      if (evIndex !== -1) {
+        dp.events.list.splice(evIndex, 1); // Xóa thủ công
+        dp.update();
+        showAlert("🗑️ Đã xoá lịch thành công", "bg-red-500");
+      }
+      console.log(dp.events.list);
+
+      bookingModal.classList.add("hidden");
     });
     function getRoomTypeById(roomId) {
       const room = rooms.find((r) => r.id === roomId);
