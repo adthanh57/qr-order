@@ -1391,10 +1391,10 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        args.e.data.start = args.newStart;
-        args.e.data.end = args.newEnd;
-        args.e.data.originalStart = args.newStart;
-        args.e.data.originalEnd = args.newEnd;
+        args.e.data.start = args.newStart.value;
+        args.e.data.end = args.newEnd.value;
+        args.e.data.originalStart = args.newStart.value;
+        args.e.data.originalEnd = args.newEnd.value;
         args.e.data.originalResource = args.newResource;
         dp.events.update(args.e);
         dp.update();
@@ -1423,12 +1423,12 @@ document.addEventListener("DOMContentLoaded", function () {
           dp.update();
           return;
         }
-        args.e.data.originalStart = args.newStart;
-        args.e.data.originalEnd = args.newEnd;
+        args.e.data.originalStart = args.newStart.value;
+        args.e.data.originalEnd = args.newEnd.value;
         args.e.data.originalResource = args.newResource;
         // Nếu không trùng thì cập nhật như bình thường
-        args.e.data.start = args.newStart;
-        args.e.data.end = args.newEnd;
+        args.e.data.start = args.newStart.value;
+        args.e.data.end = args.newEnd.value;
         dp.events.update(args.e);
         dp.update();
         showAlert("🔄 Cập nhật thời gian sự kiện thành công", "bg-blue-500");
@@ -1439,12 +1439,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const form = bookingForm;
         form.room.value = e.resource;
         form.type.value = getRoomTypeById(e.resource); // override nếu type chưa đúng
-        form.start.value = new DayPilot.Date(e.start).toString(
-          "dd/MM/yyyy HH:mm:ss"
-        );
-        form.end.value = new DayPilot.Date(e.end).toString(
-          "dd/MM/yyyy HH:mm:ss"
-        );
+        form.start.value = e.start.slice(0, 16);
+        form.end.value = e.end.slice(0, 16);
+        // form.end.value = new DayPilot.Date(e.end).toString(
+        //   "dd/MM/yyyy HH:mm:ss"
+        // );
         form.guests.value = e.guests || "";
         form.name.value = e.name || "";
         form.phone.value = e.phone || "";
@@ -1562,8 +1561,10 @@ document.addEventListener("DOMContentLoaded", function () {
       const eventId = form.dataset.eventId;
       const eObj = {
         id: eventId || DayPilot.guid(),
-        start: parseDate(form.start.value),
-        end: parseDate(form.end.value),
+        // start: parseDate(form.start.value),
+        // end: parseDate(form.end.value),
+        start: form.start.value + ":00", // Thêm giây cho chuẩn định dạng ISO
+        end: form.end.value + ":00",
         resource: form.room.value,
         text: `${form.name.value} (${form.guests.value} khách)`,
         type: form.type.value,
