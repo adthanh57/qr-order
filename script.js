@@ -1313,12 +1313,12 @@ document.addEventListener("DOMContentLoaded", function () {
       dp.days = days;
       dp.resources = rooms;
       dp.events.list = events;
-      dp.scale = "Day";
-      dp.timeHeaders = [
-        { groupBy: "Month" },
-        { groupBy: "Day", format: "dd/MM" },
-      ];
-      dp.cellWidth = 200;
+      // dp.scale = "Day";
+      // dp.timeHeaders = [
+      //   { groupBy: "Month" },
+      //   { groupBy: "Day", format: "dd/MM" },
+      // ];
+      // dp.cellWidth = 200;
       dp.update();
       return;
     }
