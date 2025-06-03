@@ -1287,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     const rooms = roomResponse.data.map((room) => ({
       id: room.RoomNo,
-      name: `Phòng ${room.RoomNo}`,
+      name: `${room.RoomNo}`,
       type: room.RoomTypeCode,
       color: room.RoomStatusColor || "#3c78d8",
     }));
