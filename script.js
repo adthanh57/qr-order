@@ -1330,7 +1330,7 @@ document.addEventListener("DOMContentLoaded", function () {
       wheelHorizontal: true,
       resources: rooms,
       events: events,
-      rowHeaderWidth: 150,
+      rowHeaderWidth: 100,
       // theme: "scheduler_white",
       contextMenu: new DayPilot.Menu({
         items: [
