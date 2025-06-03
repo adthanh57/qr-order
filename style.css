@@ -1002,7 +1002,7 @@ video {
   }
 }
 @media (max-width: 430px) {
-  .table-cart-content{
+  .table-cart-content {
     width: 408px;
   }
   #cartScreen h2,

@@ -1217,9 +1217,24 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   function initScheduler() {
     const rooms = [
-      { name: "Phòng 101", id: "R1", type: "Standard", backColor: "#6aa84f" },
-      { name: "Phòng 102", id: "R2", type: "Deluxe", backColor: "#6aa84f" },
-      { name: "Phòng 201", id: "R3", type: "VIP", backColor: "#f1c232" },
+      {
+        name: "Phòng 101",
+        id: "R1",
+        type: "Standard",
+        color: "#6aa84f",
+      },
+      {
+        name: "Phòng 102",
+        id: "R2",
+        type: "Deluxe",
+        color: "#3c78d8",
+      },
+      {
+        name: "Phòng họp 201",
+        id: "R3",
+        type: "VIP",
+        color: "#f1c232",
+      },
     ];
 
     const events = [];
@@ -1277,12 +1292,13 @@ document.addEventListener("DOMContentLoaded", function () {
       businessBeginsHour: 0,
       businessEndsHour: 0,
       cellWidth: 100,
-      wheelStep: 24,
+      wheelStep: 30,
       scrollX: "Auto",
       scrollY: "Auto",
       wheelHorizontal: true,
       resources: rooms,
       events: events,
+      rowHeaderWidth: 200, // hoặc 200, tuỳ ý
       // theme: "scheduler_white",
       contextMenu: new DayPilot.Menu({
         items: [
@@ -1411,11 +1427,19 @@ document.addEventListener("DOMContentLoaded", function () {
         args.data.barBackColor =
           args.data.type === "VIP" ? barBackColor(2) : barBackColor(1);
       },
+      onBeforeRowHeaderRender: (args) => {
+        args.row.html = `
+    <div style="padding-bottom: 6px;">
+      <div style="position: absolute; top: 0; right: 0; height: 100%; width:6px; background: ${args.row.data.color}; border-radius: 2px;"></div>
+      ${args.row.name}
+    </div>
+  `;
+      },
     });
 
     dp.init();
 
-    function openModal(args) {
+    const openModal = (args) => {
       const form = bookingForm;
       form.reset();
       form.room.value = args.resource;
@@ -1424,7 +1448,7 @@ document.addEventListener("DOMContentLoaded", function () {
       form.end.value = args.end.toString("dd/MM/yyyy HH:mm:ss");
       form.dataset.eventId = "";
       bookingModal.classList.remove("hidden");
-    }
+    };
     function barColor(i) {
       const colors = ["#3c78d8", "#6aa84f", "#f1c232", "#cc0000"];
       return colors[i % 4];
