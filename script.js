@@ -17,6 +17,7 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
 
 document.addEventListener("DOMContentLoaded", function () {
   let guestData = null;
+  let dp;
   window.cart = [];
   let currentService = null;
   let currentCategory = null;
@@ -1215,90 +1216,127 @@ document.addEventListener("DOMContentLoaded", function () {
       submitGuestOrder(window.cart, window.currentService);
     });
   }
-  function initScheduler() {
-    const rooms = [
-      {
-        name: "Phòng 101",
-        id: "R1",
-        type: "Standard",
-        color: "#6aa84f",
-      },
-      {
-        name: "Phòng 102",
-        id: "R2",
-        type: "Deluxe",
-        color: "#3c78d8",
-      },
-      {
-        name: "Phòng họp 201",
-        id: "R3",
-        type: "VIP",
-        color: "#f1c232",
-      },
-    ];
+  function getDateRange() {
+    const datePickerEl = document.getElementById("datePicker");
+    let selectedDate = datePickerEl.value
+      ? new Date(datePickerEl.value)
+      : new Date(); // fallback: hôm nay
+    const viewMode = document.getElementById("viewMode").value;
 
-    const events = [];
-    const today = DayPilot.Date.today();
+    let startDate = new Date(selectedDate);
+    let endDate = new Date(selectedDate);
 
-    events.push(
-      {
-        id: "1",
-        text: "Nguyễn Văn A (2 khách)",
-        start: today.addHours(1),
-        end: today.addHours(4),
-        resource: "R1",
-        name: "Nguyễn Văn A",
-        guests: 2,
-        phone: "0909123456",
-        email: "a@example.com",
-        note: "",
-        type: "Standard",
-      },
-      {
-        id: "2",
-        text: "Trần Thị B (3 khách)",
-        start: today.addHours(5),
-        end: today.addHours(8),
-        resource: "R2",
-        name: "Trần Thị B",
-        guests: 3,
-        phone: "0909234567",
-        email: "b@example.com",
-        note: "",
-        type: "Deluxe",
-      },
-      {
-        id: "3",
-        text: "Lê Văn C (1 khách)",
-        start: today.addHours(10),
-        end: today.addHours(12),
-        resource: "R3",
-        name: "Lê Văn C",
-        guests: 1,
-        phone: "0909345678",
-        email: "c@example.com",
-        note: "",
-        type: "VIP",
-      }
+    if (viewMode === "day") {
+      // Giữ nguyên start và end
+    } else if (viewMode === "week") {
+      const day = selectedDate.getDay();
+      const diffToMonday = selectedDate.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(selectedDate.setDate(diffToMonday));
+      endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 6);
+    } else if (viewMode === "month") {
+      startDate = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        1
+      );
+      endDate = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth() + 1,
+        0
+      );
+    }
+
+    const format = (d) =>
+      d.toLocaleDateString("en-GB").split("/").reverse().join("-");
+
+    return {
+      start: format(startDate),
+      end: format(endDate),
+    };
+  }
+
+  async function initScheduler() {
+    const { start, end } = getDateRange();
+    let startDate = start;
+    let days = 1;
+
+    if (viewMode.value === "week") {
+      days = 7;
+    } else if (viewMode.value === "month") {
+      const startD = new Date(start);
+      const endD = new Date(end);
+      days = Math.round((endD - startD) / (1000 * 60 * 60 * 24)) + 1;
+    }
+    const formatDateToMMDDYYYY = (d) => {
+      const date = new Date(d);
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      const yyyy = date.getFullYear();
+      return `${mm}/${dd}/${yyyy}`;
+    };
+    const roomResponse = await fetchAPI(
+      `SchedulerResource?date=&roomTypeID=all&roomAreaID=all`,
+      "POST"
     );
-    const dp = new DayPilot.Scheduler("dp", {
-      timeHeaders: [
-        { groupBy: "Day", format: "dd/MM/yyyy" },
-        { groupBy: "Hour" },
-      ],
-      scale: "Hour",
-      days: 30,
-      startDate: DayPilot.Date.today(),
+    const eventResponse = await fetchAPI(
+      `SchedulerData?startDate=${formatDateToMMDDYYYY(
+        start
+      )}&roomTypeID=all&roomAreaID=all&endDate=${formatDateToMMDDYYYY(end)}`,
+      "POST"
+    );
+    const rooms = roomResponse.data.map((room) => ({
+      id: room.RoomNo,
+      name: `Phòng ${room.RoomNo} (${room.RoomTypeName} - ${room.FloorName})`,
+      type: room.RoomTypeCode,
+      color: room.RoomStatusColor || "#3c78d8",
+    }));
+    const events = eventResponse.data.map((ev) => ({
+      id: ev.id,
+      start: ev.start,
+      end: ev.end,
+      resource: ev.resource,
+      text: `${ev.name} (${ev.guests} khách)`,
+      name: ev.name,
+      guests: ev.guests,
+      phone: ev.phone,
+      email: ev.email,
+      note: ev.note,
+      type: ev.type,
+      originalStart: ev.originalStart,
+      originalEnd: ev.originalEnd,
+      originalResource: ev.originalResource,
+      Color: ev.Color,
+    }));
+    if (dp) {
+      dp.startDate = startDate;
+      dp.days = days;
+      dp.resources = rooms;
+      dp.events.list = events;
+      dp.scale = "Day";
+      dp.timeHeaders = [
+        { groupBy: "Month" },
+        { groupBy: "Day", format: "dd/MM" },
+      ];
+      dp.cellWidth = 200;
+      dp.update();
+      return;
+    }
+    dp = new DayPilot.Scheduler("dp", {
+      timeHeaders: [{ groupBy: "Month" }, { groupBy: "Day", format: "dd/MM" }],
+      scale: "Day",
+      days: days,
+      startDate: startDate,
       businessBeginsHour: 0,
       businessEndsHour: 0,
-      cellWidth: 100,
+      cellWidth: 200,
       wheelStep: 30,
       scrollX: "Auto",
       scrollY: "Auto",
       wheelHorizontal: true,
       resources: rooms,
       events: events,
-      rowHeaderWidth: 200, // hoặc 200, tuỳ ý
+      rowHeaderWidth: 250,
       // theme: "scheduler_white",
       contextMenu: new DayPilot.Menu({
         items: [
@@ -1422,12 +1460,11 @@ document.addEventListener("DOMContentLoaded", function () {
         bookingModal.classList.remove("hidden");
       },
       onBeforeEventRender: (args) => {
-        args.data.barColor =
-          args.data.type === "VIP" ? barColor(2) : barColor(1);
-        args.data.barBackColor =
-          args.data.type === "VIP" ? barBackColor(2) : barBackColor(1);
+        args.data.barColor = args.data.Color;
+        args.data.barBackColor = args.data.Color;
       },
       onBeforeRowHeaderRender: (args) => {
+        console.log(dp.events.list);
         args.row.html = `
     <div style="padding-bottom: 6px;">
       <div style="position: absolute; top: 0; right: 0; height: 100%; width:6px; background: ${args.row.data.color}; border-radius: 2px;"></div>
@@ -1565,21 +1602,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     datePicker.valueAsDate = new Date();
     datePicker.addEventListener("change", function (e) {
-      dp.startDate = e.target.value;
-      dp.update();
+      initScheduler();
     });
 
     // Thay đổi chế độ xem (ngày/tuần/tháng)
     viewMode.addEventListener("change", function (e) {
-      const mode = e.target.value;
-      if (mode === "day") {
-        dp.days = 1;
-      } else if (mode === "week") {
-        dp.days = 7;
-      } else {
-        dp.days = 30;
-      }
-      dp.update();
+      initScheduler();
     });
     // Thay đổi chế độ chọn (giờ/ngày)
     scaleSelect.addEventListener("change", function (e) {
@@ -1636,12 +1664,11 @@ document.addEventListener("DOMContentLoaded", function () {
       setTimeout(() => box.classList.add("hidden"), 3000);
     }
     // Giả lập fetch loại phòng từ API
-    const roomTypesFromAPI = ["Standard", "Deluxe", "VIP"];
     const typeSelect = document.getElementById("roomTypeSelect");
-    roomTypesFromAPI.forEach((type) => {
+    rooms.forEach((data) => {
       const option = document.createElement("option");
-      option.value = type;
-      option.textContent = type;
+      option.value = data.type;
+      option.textContent = data.type;
       typeSelect.appendChild(option);
     });
     window.closeModal = closeModal;
