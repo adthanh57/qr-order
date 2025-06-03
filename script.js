@@ -1399,7 +1399,6 @@ document.addEventListener("DOMContentLoaded", function () {
         dp.events.update(args.e);
         dp.update();
         showAlert("✏️ Đã thay đổi thời gian sự kiện", "bg-indigo-500");
-        console.log(dp.events.list);
       },
       onEventMoved: (args) => {
         const movedEvent = {
@@ -1432,7 +1431,6 @@ document.addEventListener("DOMContentLoaded", function () {
         dp.events.update(args.e);
         dp.update();
         showAlert("🔄 Cập nhật thời gian sự kiện thành công", "bg-blue-500");
-        console.log(dp.events.list);
       },
       onEventClick: (args) => {
         const e = args.e.data;
@@ -1457,7 +1455,6 @@ document.addEventListener("DOMContentLoaded", function () {
         args.data.barBackColor = args.data.Color;
       },
       onBeforeRowHeaderRender: (args) => {
-        console.log(dp.events.list);
         args.row.html = `
     <div style="padding-bottom: 6px;">
       <div style="position: absolute; top: 0; right: 0; height: 100%; width:6px; background: ${args.row.data.color}; border-radius: 2px;"></div>
@@ -1592,7 +1589,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
       closeModal();
-      console.log(dp.events.list);
     });
 
     datePicker.valueAsDate = new Date();
@@ -1643,8 +1639,6 @@ document.addEventListener("DOMContentLoaded", function () {
         dp.update();
         showAlert("🗑️ Đã xoá lịch thành công", "bg-red-500");
       }
-      console.log(dp.events.list);
-
       bookingModal.classList.add("hidden");
     });
     function getRoomTypeById(roomId) {
