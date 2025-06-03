@@ -766,97 +766,99 @@
             <form id="bookingForm" class="space-y-3">
               <h3 class="text-lg font-semibold mb-2">Đặt phòng</h3>
               <!-- Số phòng -->
-              <label class="block"
-                >Số phòng <span class="text-red-500">*</span>
-                <input
-                  name="room"
-                  readonly
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="block"
+                  >Số phòng <span class="text-red-500">*</span>
+                  <input
+                    name="room"
+                    readonly
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
 
-              <!-- Loại phòng -->
-              <label class="block"
-                >Loại phòng <span class="text-red-500">*</span>
-                <select
-                  name="type"
-                  disabled
-                  id="roomTypeSelect"
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                >
-                  <option value="">-- Chọn loại phòng --</option>
-                  <!-- Các option sẽ được thêm bằng JS -->
-                </select>
-              </label>
+                <!-- Loại phòng -->
+                <label class="block"
+                  >Loại phòng <span class="text-red-500">*</span>
+                  <select
+                    name="type"
+                    disabled
+                    id="roomTypeSelect"
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  >
+                    <option value="">-- Chọn loại phòng --</option>
+                    <!-- Các option sẽ được thêm bằng JS -->
+                  </select>
+                </label>
 
-              <!-- Từ ngày -->
-              <label class="block"
-                >Từ ngày <span class="text-red-500">*</span>
-                <input
-                  name="start"
-                  required
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
+                <!-- Từ ngày -->
+                <label class="block"
+                  >Từ ngày <span class="text-red-500">*</span>
+                  <input
+                    name="start"
+                    required
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
 
-              <!-- Đến ngày -->
-              <label class="block"
-                >Đến ngày <span class="text-red-500">*</span>
-                <input
-                  name="end"
-                  required
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
+                <!-- Đến ngày -->
+                <label class="block"
+                  >Đến ngày <span class="text-red-500">*</span>
+                  <input
+                    name="end"
+                    required
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
 
-              <!-- Số lượng khách -->
-              <label class="block"
-                >Số lượng khách <span class="text-red-500">*</span>
-                <input
-                  name="guests"
-                  type="number"
-                  required
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
+                <!-- Họ tên -->
+                <label class="block"
+                  >Họ & tên <span class="text-red-500">*</span>
+                  <input
+                    name="name"
+                    required
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
 
-              <!-- Họ tên -->
-              <label class="block"
-                >Họ & tên <span class="text-red-500">*</span>
-                <input
-                  name="name"
-                  required
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
+                <!-- SĐT -->
+                <label class="block"
+                  >Số điện thoại <span class="text-red-500">*</span>
+                  <input
+                    name="phone"
+                    required
+                    maxlength="10"
+                    pattern="^0\d{9}$"
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
 
-              <!-- SĐT -->
-              <label class="block"
-                >Số điện thoại <span class="text-red-500">*</span>
-                <input
-                  name="phone"
-                  required
-                  maxlength="10"
-                  pattern="^0\d{9}$"
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
+                <!-- Email -->
+                <label class="block"
+                  >Email
+                  <input
+                    name="email"
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
+                <!-- Số lượng khách -->
+                <label class="block"
+                  >Số lượng khách <span class="text-red-500">*</span>
+                  <input
+                    name="guests"
+                    type="number"
+                    required
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  />
+                </label>
+                <label class="block"
+                  >Ghi chú
+                  <textarea
+                    name="note"
+                    class="mt-1 border rounded px-3 py-1 w-full"
+                  ></textarea>
+                </label>
+              </div>
 
-              <!-- Email -->
-              <label class="block"
-                >Email
-                <input
-                  name="email"
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                />
-              </label>
-              <label class="block"
-                >Ghi chú
-                <textarea
-                  name="note"
-                  class="mt-1 border rounded px-3 py-1 w-full"
-                ></textarea>
-              </label>
               <div class="flex justify-between gap-3">
                 <div>
                   <button

@@ -1287,7 +1287,7 @@ document.addEventListener("DOMContentLoaded", function () {
     );
     const rooms = roomResponse.data.map((room) => ({
       id: room.RoomNo,
-      name: `Phòng ${room.RoomNo} (${room.RoomTypeName} - ${room.FloorName})`,
+      name: `Phòng ${room.RoomNo}`,
       type: room.RoomTypeCode,
       color: room.RoomStatusColor || "#3c78d8",
     }));
@@ -1313,12 +1313,6 @@ document.addEventListener("DOMContentLoaded", function () {
       dp.days = days;
       dp.resources = rooms;
       dp.events.list = events;
-      // dp.scale = "Day";
-      // dp.timeHeaders = [
-      //   { groupBy: "Month" },
-      //   { groupBy: "Day", format: "dd/MM" },
-      // ];
-      // dp.cellWidth = 200;
       dp.update();
       return;
     }
@@ -1329,14 +1323,14 @@ document.addEventListener("DOMContentLoaded", function () {
       startDate: startDate,
       businessBeginsHour: 0,
       businessEndsHour: 0,
-      cellWidth: 200,
+      cellWidth: 100,
       wheelStep: 30,
       scrollX: "Auto",
       scrollY: "Auto",
       wheelHorizontal: true,
       resources: rooms,
       events: events,
-      rowHeaderWidth: 250,
+      rowHeaderWidth: 150,
       // theme: "scheduler_white",
       contextMenu: new DayPilot.Menu({
         items: [
@@ -1619,14 +1613,14 @@ document.addEventListener("DOMContentLoaded", function () {
           { groupBy: "Day", format: "dd/MM/yyyy" },
           { groupBy: "Hour" },
         ];
-        dp.cellWidth = 100;
+        dp.cellWidth = 50;
       } else if (scale === "Day") {
         dp.scale = "Day";
         dp.timeHeaders = [
           { groupBy: "Month" },
           { groupBy: "Day", format: "dd/MM" },
         ];
-        dp.cellWidth = 200;
+        dp.cellWidth = 100;
       }
 
       dp.update(); // cập nhật lại giao diện
