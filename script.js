@@ -1285,29 +1285,35 @@ document.addEventListener("DOMContentLoaded", function () {
       )}&roomTypeID=all&roomAreaID=all&endDate=${formatDateToMMDDYYYY(end)}`,
       "POST"
     );
-    const rooms = roomResponse.data.map((room) => ({
-      id: room.RoomNo,
-      name: `${room.RoomNo}`,
-      type: room.RoomTypeCode,
-      color: room.RoomStatusColor || "#3c78d8",
-    }));
-    const events = eventResponse.data.map((ev) => ({
-      id: ev.id,
-      start: ev.start,
-      end: ev.end,
-      resource: ev.resource,
-      text: `${ev.name} (${ev.guests} khách)`,
-      name: ev.name,
-      guests: ev.guests,
-      phone: ev.phone,
-      email: ev.email,
-      note: ev.note,
-      type: ev.type,
-      originalStart: ev.originalStart,
-      originalEnd: ev.originalEnd,
-      originalResource: ev.originalResource,
-      Color: ev.Color,
-    }));
+    // Sửa tại đây
+    const rooms = Array.isArray(roomResponse.data)
+      ? roomResponse.data.map((room) => ({
+          id: room.RoomNo,
+          name: `${room.RoomNo}`,
+          type: room.RoomTypeCode,
+          color: room.RoomStatusColor || "#3c78d8",
+        }))
+      : [];
+
+    const events = Array.isArray(eventResponse.data)
+      ? eventResponse.data.map((ev) => ({
+          id: ev.id,
+          start: ev.start,
+          end: ev.end,
+          resource: ev.resource,
+          text: `${ev.name} (${ev.guests} khách)`,
+          name: ev.name,
+          guests: ev.guests,
+          phone: ev.phone,
+          email: ev.email,
+          note: ev.note,
+          type: ev.type,
+          originalStart: ev.originalStart,
+          originalEnd: ev.originalEnd,
+          originalResource: ev.originalResource,
+          Color: ev.Color,
+        }))
+      : [];
     if (dp) {
       dp.startDate = startDate;
       dp.days = days;
@@ -1465,16 +1471,38 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     dp.init();
-
+    // ✅ Thêm hàm tại đây
+    function toDatetimeLocalString(date) {
+      const d = new Date(date);
+      const pad = (n) => String(n).padStart(2, "0");
+      return (
+        d.getFullYear() +
+        "-" +
+        pad(d.getMonth() + 1) +
+        "-" +
+        pad(d.getDate()) +
+        "T" +
+        pad(d.getHours()) +
+        ":" +
+        pad(d.getMinutes())
+      );
+    }
     const openModal = (args) => {
       const form = bookingForm;
       form.reset();
       form.room.value = args.resource;
       form.type.value = getRoomTypeById(args.resource);
-      form.start.value = args.start.toString("dd/MM/yyyy HH:mm:ss");
-      form.end.value = args.end.toString("dd/MM/yyyy HH:mm:ss");
+      form.start.value = toDatetimeLocalString(args.start);
+      form.end.value = toDatetimeLocalString(args.end);
       form.dataset.eventId = "";
       bookingModal.classList.remove("hidden");
+
+      // 🧠 Gắn lại submit mỗi khi mở modal để đảm bảo form tồn tại
+      form.onsubmit = async function (e) {
+        e.preventDefault();
+        console.log("📥 Đã submit bookingForm trong modal");
+        // ➕ THÊM đoạn xử lý API UpdateScheduler tại đây hoặc gọi hàm handleBookingFormSubmit(form)
+      };
     };
     function barColor(i) {
       const colors = ["#3c78d8", "#6aa84f", "#f1c232", "#cc0000"];
@@ -1504,7 +1532,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return !(end2 <= start1 || start2 >= end1); // Có giao nhau
       });
     }
-    bookingForm.addEventListener("submit", function (e) {
+    bookingForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       const form = e.target;
 
@@ -1528,53 +1556,68 @@ document.addEventListener("DOMContentLoaded", function () {
           form[field].focus();
           return;
         }
+
         if (field === "email") {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(value)) {
+          if (!emailRegex.test(form.email.value.trim())) {
             showAlert("⚠️ Email không đúng định dạng", "bg-yellow-500");
-            form[field].focus();
+            form.email.focus();
             return;
           }
         }
+
         if (field === "phone") {
           const phoneRegex = /^0\d{9}$/;
-          if (!phoneRegex.test(value)) {
+          if (!phoneRegex.test(form.phone.value.trim())) {
             showAlert(
               "⚠️ Số điện thoại phải có 10 chữ số và bắt đầu bằng 0",
               "bg-yellow-500"
             );
-            form[field].focus();
+            form.phone.focus();
             return;
           }
         }
       }
 
-      const parseDate = (str) => {
-        const [date, time] = str.split(" ");
-        const [day, month, year] = date.split("/");
-        return `${year}-${month}-${day}T${time}`;
+      const eventId = form.dataset.eventId || "";
+
+      // ✅ datetime-local trả dạng 'YYYY-MM-DDTHH:mm' => nối ':00' để có định dạng đầy đủ
+      const toDateTime = (val) => {
+        if (!val) return "";
+        const parts = val.split("T");
+        if (parts.length !== 2) return "";
+        return parts[0] + " " + parts[1] + (parts[1].length === 5 ? ":00" : "");
       };
 
-      const eventId = form.dataset.eventId;
-      const eObj = {
-        id: eventId || DayPilot.guid(),
-        // start: parseDate(form.start.value),
-        // end: parseDate(form.end.value),
-        start: form.start.value + ":00", // Thêm giây cho chuẩn định dạng ISO
-        end: form.end.value + ":00",
-        resource: form.room.value,
-        text: `${form.name.value} (${form.guests.value} khách)`,
-        type: form.type.value,
-        guests: form.guests.value,
-        name: form.name.value,
-        phone: form.phone.value,
-        email: form.email.value,
-        note: form.note.value,
-        originalStart: parseDate(form.start.value),
-        originalEnd: parseDate(form.end.value),
-        originalResource: form.room.value,
+      const payload = {
+        id: form.dataset.eventId || "",
+        resid: null,
+        start: toDateTime(form.start.value) || null,
+        end: toDateTime(form.end.value) || null,
+        resource: form.room.value || null,
+        name: form.name.value || "",
+        guests: parseInt(form.guests.value) || 0,
+        phone: form.phone.value || "",
+        email: form.email.value || "",
+        note: form.note.value || "",
+
+        // Các trường không bắt buộc nhưng vẫn thêm với giá trị null
+        status: null,
+        text: null,
+        type: null,
+        originalStart: null,
+        originalEnd: null,
+        originalResource: null,
+        Color: null,
       };
-      if (isOverlapping(eObj)) {
+
+      // Kiểm tra trùng sự kiện
+      const checkOverlap = {
+        ...payload,
+        id: eventId || DayPilot.guid(),
+      };
+
+      if (isOverlapping(checkOverlap)) {
         showAlert(
           "⚠️ Phòng này đã được đặt trong khoảng thời gian đó!",
           "bg-red-600"
@@ -1582,13 +1625,43 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      if (eventId) {
-        dp.events.update(eObj);
-      } else {
-        dp.events.add(eObj);
+      try {
+        console.log("📡 Gửi API UpdateScheduler", payload);
+        const res = await fetchAPI("UpdateScheduler", "POST", payload);
+
+        if (res.error === "true") {
+          showAlert(`❌ ${res.message}`, "bg-red-600");
+          return;
+        }
+
+        const updated = res.data;
+
+        const event = {
+          id: updated.id,
+          start: updated.start,
+          end: updated.end,
+          resource: updated.resource,
+          text: `${updated.name} (${updated.guests} khách)`,
+          guests: updated.guests,
+          name: updated.name,
+          phone: updated.phone,
+          email: updated.email,
+          note: updated.note,
+        };
+
+        if (eventId) {
+          dp.events.update(event);
+        } else {
+          dp.events.add(event);
+        }
+
+        dp.update();
+        showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
+        bookingModal.classList.add("hidden");
+      } catch (err) {
+        console.error("❌ Gọi API UpdateScheduler thất bại:", err);
+        showAlert("❌ Không thể kết nối API", "bg-red-600");
       }
-      showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
-      closeModal();
     });
 
     datePicker.valueAsDate = new Date();
