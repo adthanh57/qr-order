@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <span class="ml-3 sidebar-item-text">${service.Name}</span>
       </a>
     `;
-      if (service.Name === "MICE") {
+      if (service.Code === "MICE") {
         li.querySelector("a").addEventListener("click", (e) => {
           e.preventDefault();
           showScreen(document.getElementById("miceSchedulerScreen"));
@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", function () {
         serviceCard.addEventListener("click", function () {
           currentService = service;
           window.currentService = service;
-          if (service.Name === "MICE") {
+          if (service.Code === "MICE") {
             showScreen(document.getElementById("miceSchedulerScreen"));
             if (!window.schedulerInitialized) {
               initScheduler();
@@ -1342,16 +1342,14 @@ document.addEventListener("DOMContentLoaded", function () {
         items: [
           {
             text: "Xoá đặt phòng",
-            onClick: (args) => {
-              if (confirm("Bạn có chắc chắn muốn xoá lịch đặt phòng này?")) {
-                dp.events.remove(args.source);
-                showAlert("Đã xóa sự kiện thành công", "bg-red-500");
-                showAlert("❌ Đã xoá sự kiện thành công", "bg-red-500");
-              }
+            onClick: async (args) => {
+              const eventId = args.source.data.id;
+              await deleteSchedulerEvent(eventId);
             },
           },
         ],
       }),
+
       onTimeRangeSelected: (args) => {
         // Tạo object mô phỏng event mới
         const newEvent = {
@@ -1374,7 +1372,8 @@ document.addEventListener("DOMContentLoaded", function () {
         openModal(args);
         dp.clearSelection();
       },
-      onEventResized: (args) => {
+
+      onEventResized: async (args) => {
         const resizedEvent = {
           ...args.e.data,
           start: args.newStart,
@@ -1386,7 +1385,14 @@ document.addEventListener("DOMContentLoaded", function () {
             "⚠️ Thời gian mới bị trùng với một lịch khác!",
             "bg-red-600"
           );
-          // Rollback
+          args.preventDefault();
+          return;
+        }
+
+        const result = await saveSchedulerEvent(resizedEvent);
+
+        if (!result) {
+          // ❌ API lỗi → rollback
           args.e.data.start = args.e.data.originalStart;
           args.e.data.end = args.e.data.originalEnd;
           args.e.data.resource = args.e.data.originalResource;
@@ -1394,31 +1400,32 @@ document.addEventListener("DOMContentLoaded", function () {
           args.preventDefault(); // Ngăn DayPilot cập nhật event
           dp.events.update(args.e); // Cập nhật lại event
           dp.update();
-          return;
+          showAlert("❌ Cập nhật thất bại, đã hoàn tác", "bg-red-600");
+        } else {
+          // ✅ API thành công → cập nhật UI
+          dp.events.update(result);
+          dp.update();
+          showAlert("✏️ Đã thay đổi thời gian sự kiện", "bg-indigo-500");
         }
-
-        args.e.data.start = args.newStart.value;
-        args.e.data.end = args.newEnd.value;
-        args.e.data.originalStart = args.newStart.value;
-        args.e.data.originalEnd = args.newEnd.value;
-        args.e.data.originalResource = args.newResource;
-        dp.events.update(args.e);
-        dp.update();
-        showAlert("✏️ Đã thay đổi thời gian sự kiện", "bg-indigo-500");
       },
-      onEventMoved: (args) => {
+      onEventMoved: async (args) => {
         const movedEvent = {
           ...args.e.data,
           start: args.newStart,
           end: args.newEnd,
+          resource: args.newResource,
         };
 
         if (isOverlapping(movedEvent)) {
-          showAlert(
-            "⚠️ Thời gian mới bị trùng với một lịch khác!",
-            "bg-red-600"
-          );
-          // Rollback
+          showAlert("⚠️ Lịch bị trùng!", "bg-red-600");
+          args.preventDefault();
+          return;
+        }
+
+        const result = await saveSchedulerEvent(movedEvent);
+
+        if (!result) {
+          // ❌ API lỗi → rollback
           args.e.data.start = args.e.data.originalStart;
           args.e.data.end = args.e.data.originalEnd;
           args.e.data.resource = args.e.data.originalResource;
@@ -1426,25 +1433,20 @@ document.addEventListener("DOMContentLoaded", function () {
           args.preventDefault(); // Ngăn DayPilot cập nhật event
           dp.events.update(args.e); // Cập nhật lại event
           dp.update();
-          return;
+        } else {
+          dp.events.update(result);
+          dp.update();
+          showAlert("🔄 Đã cập nhật sự kiện", "bg-blue-500");
         }
-        args.e.data.originalStart = args.newStart.value;
-        args.e.data.originalEnd = args.newEnd.value;
-        args.e.data.originalResource = args.newResource;
-        // Nếu không trùng thì cập nhật như bình thường
-        args.e.data.start = args.newStart.value;
-        args.e.data.end = args.newEnd.value;
-        dp.events.update(args.e);
-        dp.update();
-        showAlert("🔄 Cập nhật thời gian sự kiện thành công", "bg-blue-500");
       },
+
       onEventClick: (args) => {
         const e = args.e.data;
         const form = bookingForm;
         form.room.value = e.resource;
         form.type.value = getRoomTypeById(e.resource); // override nếu type chưa đúng
-        form.start.value = e.start.slice(0, 16);
-        form.end.value = e.end.slice(0, 16);
+        form.start.value = toDatetimeLocalString(e.start);
+        form.end.value = toDatetimeLocalString(e.end);
         // form.end.value = new DayPilot.Date(e.end).toString(
         //   "dd/MM/yyyy HH:mm:ss"
         // );
@@ -1511,6 +1513,96 @@ document.addEventListener("DOMContentLoaded", function () {
     function barBackColor(i) {
       const colors = ["#a4c2f4", "#b6d7a8", "#ffe599", "#ea9999"];
       return colors[i % 4];
+    }
+    async function saveSchedulerEvent(e) {
+      const roomObj = rooms.find((r) => r.id === e.resource);
+
+      const toDateTime = (d) => {
+        const date = new Date(d);
+        const pad = (n) => String(n).padStart(2, "0");
+        return (
+          date.getFullYear() +
+          "-" +
+          pad(date.getMonth() + 1) +
+          "-" +
+          pad(date.getDate()) +
+          " " +
+          pad(date.getHours()) +
+          ":" +
+          pad(date.getMinutes()) +
+          ":" +
+          pad(date.getSeconds() || 0)
+        );
+      };
+
+      const payload = {
+        id: e.id || "",
+        resid: roomObj?.resid || null,
+        start: toDateTime(e.start),
+        end: toDateTime(e.end),
+        resource: e.resource || null,
+        name: e.name || "",
+        guests: parseInt(e.guests) || 0,
+        phone: e.phone || "",
+        email: e.email || "",
+        note: e.note || "",
+        status: null,
+        text: null,
+        type: null,
+        originalStart: null,
+        originalEnd: null,
+        originalResource: null,
+        Color: null,
+      };
+
+      try {
+        const res = await fetchAPI("UpdateScheduler", "POST", payload);
+        if (res.error === "true") {
+          showAlert(`❌ ${res.message}`, "bg-red-600");
+          return null;
+        }
+
+        const updated = res.data;
+        return {
+          ...updated,
+          text: `${updated.name} (${updated.guests} khách)`,
+        };
+      } catch (err) {
+        console.error("❌ Gọi API UpdateScheduler thất bại:", err);
+        showAlert("❌ Không thể kết nối API", "bg-red-600");
+        return null;
+      }
+    }
+    async function deleteSchedulerEvent(eventId) {
+      if (!eventId) {
+        showAlert("⚠️ Không tìm thấy ID sự kiện!", "bg-red-500");
+        return false;
+      }
+
+      if (!confirm("Bạn có chắc chắn muốn xoá lịch này?")) return false;
+
+      try {
+        const res = await fetchAPI(`DeleteScheduler?id=${eventId}`, "POST");
+
+        if (res.error === "true") {
+          showAlert(`❌ ${res.message}`, "bg-red-600");
+          return false;
+        }
+
+        // Xoá khỏi UI
+        const evIndex = dp.events.list.findIndex((e) => e.id == eventId);
+        if (evIndex !== -1) {
+          dp.events.list.splice(evIndex, 1);
+          dp.update();
+        }
+
+        showAlert("🗑️ Đã xoá lịch thành công", "bg-red-500");
+        return true;
+      } catch (err) {
+        console.error("❌ Lỗi khi gọi API DeleteScheduler:", err);
+        showAlert("❌ Không thể kết nối API xoá", "bg-red-600");
+        return false;
+      }
     }
 
     function closeModal() {
@@ -1625,43 +1717,19 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      try {
-        console.log("📡 Gửi API UpdateScheduler", payload);
-        const res = await fetchAPI("UpdateScheduler", "POST", payload);
+      const saved = await saveSchedulerEvent(payload);
 
-        if (res.error === "true") {
-          showAlert(`❌ ${res.message}`, "bg-red-600");
-          return;
-        }
+      if (!saved) return;
 
-        const updated = res.data;
-
-        const event = {
-          id: updated.id,
-          start: updated.start,
-          end: updated.end,
-          resource: updated.resource,
-          text: `${updated.name} (${updated.guests} khách)`,
-          guests: updated.guests,
-          name: updated.name,
-          phone: updated.phone,
-          email: updated.email,
-          note: updated.note,
-        };
-
-        if (eventId) {
-          dp.events.update(event);
-        } else {
-          dp.events.add(event);
-        }
-
-        dp.update();
-        showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
-        bookingModal.classList.add("hidden");
-      } catch (err) {
-        console.error("❌ Gọi API UpdateScheduler thất bại:", err);
-        showAlert("❌ Không thể kết nối API", "bg-red-600");
+      if (eventId) {
+        dp.events.update(saved);
+      } else {
+        dp.events.add(saved);
       }
+
+      dp.update();
+      showAlert("✅ Lưu thông tin đặt phòng thành công", "bg-green-600");
+      bookingModal.classList.add("hidden");
     });
 
     datePicker.valueAsDate = new Date();
@@ -1695,25 +1763,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       dp.update(); // cập nhật lại giao diện
     });
-    deleteEventBtn.addEventListener("click", function () {
-      const form = bookingForm;
-      const eventId = form.dataset.eventId;
-
-      if (!eventId) {
-        showAlert("⚠️ Không tìm thấy lịch để xoá!", "bg-red-500");
-        return;
-      }
-
-      if (!confirm("Bạn có chắc chắn muốn xoá lịch này?")) return;
-
-      const evIndex = dp.events.list.findIndex((e) => e.id == eventId);
-      if (evIndex !== -1) {
-        dp.events.list.splice(evIndex, 1); // Xóa thủ công
-        dp.update();
-        showAlert("🗑️ Đã xoá lịch thành công", "bg-red-500");
-      }
-      bookingModal.classList.add("hidden");
+    deleteEventBtn.addEventListener("click", async function () {
+      const eventId = bookingForm.dataset.eventId;
+      const deleted = await deleteSchedulerEvent(eventId);
+      if (deleted) bookingModal.classList.add("hidden");
     });
+
     function getRoomTypeById(roomId) {
       const room = rooms.find((r) => r.id === roomId);
       return room ? room.type : "";
