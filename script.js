@@ -1295,7 +1295,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const rooms = Array.isArray(roomResponse.data)
       ? roomResponse.data.map((room) => ({
           id: room.RoomNo,
-          name: `${room.RoomNo}`,
+          name: `${room.RoomName}`,
           type: room.RoomTypeCode,
           color: room.RoomStatusColor || "#3c78d8",
         }))
