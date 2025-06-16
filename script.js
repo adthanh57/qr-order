@@ -285,10 +285,8 @@ document.addEventListener("DOMContentLoaded", function () {
         li.querySelector("a").addEventListener("click", (e) => {
           e.preventDefault();
           showScreen(document.getElementById("miceSchedulerScreen"));
-          if (!window.schedulerInitialized) {
-            initScheduler();
-            window.schedulerInitialized = true;
-          }
+          window.schedulerRoomAreaID = service.ID;
+          initScheduler();
         });
       } else {
         li.querySelector("a").addEventListener("click", (e) => {
@@ -355,10 +353,8 @@ document.addEventListener("DOMContentLoaded", function () {
           window.currentService = service;
           if (service.Type === 8) {
             showScreen(document.getElementById("miceSchedulerScreen"));
-            if (!window.schedulerInitialized) {
-              initScheduler();
-              window.schedulerInitialized = true;
-            }
+            window.schedulerRoomAreaID = service.ID; // 🆕 Gán ID vào biến toàn cục
+            initScheduler();
             return;
           }
           renderCategories(service.ID, service.Name);
@@ -1281,14 +1277,17 @@ document.addEventListener("DOMContentLoaded", function () {
       const yyyy = date.getFullYear();
       return `${mm}/${dd}/${yyyy}`;
     };
+    const roomAreaID = window.schedulerRoomAreaID || "all"; // 🆕
     const roomResponse = await fetchAPI(
-      `SchedulerResource?date=&roomTypeID=all&roomAreaID=all`,
+      `SchedulerResource?date=&roomTypeID=all&roomAreaID=${roomAreaID}`,
       "POST"
     );
     const eventResponse = await fetchAPI(
       `SchedulerData?startDate=${formatDateToMMDDYYYY(
         start
-      )}&roomTypeID=all&roomAreaID=all&endDate=${formatDateToMMDDYYYY(end)}`,
+      )}&roomTypeID=all&roomAreaID=${roomAreaID}&endDate=${formatDateToMMDDYYYY(
+        end
+      )}`,
       "POST"
     );
     // Sửa tại đây
