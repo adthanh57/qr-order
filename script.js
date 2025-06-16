@@ -16,6 +16,8 @@ async function fetchAPI(endpoint, method = "GET", body = null) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+  localStorage.clear(); // Xoá toàn bộ localStorage
+  sessionStorage.clear(); // Nếu dùng sessionStorage thì thêm
   let guestData = null;
   let dp;
   window.cart = [];
@@ -24,10 +26,14 @@ document.addEventListener("DOMContentLoaded", function () {
   let discount = 0;
   let isSidebarCollapsed = false;
   let isStaffLoggedIn = localStorage.getItem("staffLoggedIn") === "1";
-  if (isStaffLoggedIn) {
+  function updateLogoutVisibility() {
     const logoutBtn = document.getElementById("staffLogoutBtn");
-    if (logoutBtn) logoutBtn.classList.remove("hidden");
+    const isStaffLoggedIn = localStorage.getItem("staffLoggedIn") === "1";
+    if (logoutBtn) {
+      logoutBtn.classList.toggle("hidden", !isStaffLoggedIn);
+    }
   }
+  updateLogoutVisibility();
   // Elements
   const sidebar = document.getElementById("sidebar");
   const mainContent = document.getElementById("mainContent");
@@ -160,8 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (username === "admin" && password === "123456") {
       localStorage.setItem("staffLoggedIn", "1");
       isStaffLoggedIn = true;
-      const logoutBtn = document.getElementById("staffLogoutBtn");
-      if (logoutBtn) logoutBtn.classList.remove("hidden");
+      updateLogoutVisibility();
       showToast("Đăng nhập thành công!");
       showScreen(serviceScreen);
     } else {
@@ -231,6 +236,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCartCount();
     showScreen(serviceScreen);
   });
+
   function showScreen(screen) {
     const protectedScreens = [
       "serviceScreen",
@@ -721,11 +727,11 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleStaffLogout() {
     localStorage.removeItem("staffLoggedIn");
     window.isStaffLoggedIn = false;
-    const logoutBtn = document.getElementById("staffLogoutBtn");
-    if (logoutBtn) logoutBtn.classList.add("hidden");
+    updateLogoutVisibility();
     showToast("Đã đăng xuất nhân viên");
     showScreen(welcomeScreen);
   }
+
   function showGuestForm() {
     const formScreen = document.getElementById("guestFormScreen");
 
