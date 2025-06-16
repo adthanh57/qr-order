@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <span class="ml-3 sidebar-item-text">${service.Name}</span>
       </a>
     `;
-      if (service.Code === "MICE") {
+      if (service.Type === 8) {
         li.querySelector("a").addEventListener("click", (e) => {
           e.preventDefault();
           showScreen(document.getElementById("miceSchedulerScreen"));
@@ -353,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
         serviceCard.addEventListener("click", function () {
           currentService = service;
           window.currentService = service;
-          if (service.Code === "MICE") {
+          if (service.Type === 8) {
             showScreen(document.getElementById("miceSchedulerScreen"));
             if (!window.schedulerInitialized) {
               initScheduler();
