@@ -1633,15 +1633,7 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
       const form = e.target;
 
-      const requiredFields = [
-        "room",
-        "type",
-        "start",
-        "end",
-        "guests",
-        "name",
-        "phone",
-      ];
+      const requiredFields = ["start", "end", "guests", "name", "phone"];
 
       for (const field of requiredFields) {
         const value = form[field].value.trim();
@@ -1701,7 +1693,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Các trường không bắt buộc nhưng vẫn thêm với giá trị null
         status: null,
         text: null,
-        type: null,
+        type: form.type.value || null,
         originalStart: null,
         originalEnd: null,
         originalResource: null,
@@ -1785,14 +1777,7 @@ document.addEventListener("DOMContentLoaded", function () {
       box.classList.remove("hidden");
       setTimeout(() => box.classList.add("hidden"), 3000);
     }
-    // Giả lập fetch loại phòng từ API
-    const typeSelect = document.getElementById("roomTypeSelect");
-    rooms.forEach((data) => {
-      const option = document.createElement("option");
-      option.value = data.type;
-      option.textContent = data.type;
-      typeSelect.appendChild(option);
-    });
+
     window.closeModal = closeModal;
   }
   window.showGuestForm = showGuestForm;
